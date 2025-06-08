@@ -40,29 +40,34 @@ resource "vercel_project_environment_variables" "lumen_api_vars" {
   project_id = vercel_project.lumen_api.id
   variables = [ 
     {
-        key = "MYSQL_HOST",
-        value = var.mysql_host,
+        key = "MYSQL_HOST"
+        value = var.mysql_host
         sensitive = true
+        target   = ["production", "preview", "development"]
     },
     {
-        key = "MYSQL_PORT",
-        value = var.mysql_port,
+        key = "MYSQL_PORT"
+        value = var.mysql_port
         sensitive = true
+        target   = ["production", "preview", "development"]
     },
     {
-        key = "MYSQL_DATABASE",
-        value = var.mysql_database,
+        key = "MYSQL_DATABASE"
+        value = var.mysql_database
         sensitive = true
+        target   = ["production", "preview", "development"]
     },
     {
-        key = "MYSQL_USER",
-        value = var.mysql_user,
+        key = "MYSQL_USER"
+        value = var.mysql_user
         sensitive = true
+        target   = ["production", "preview", "development"]
     },
     {
-        key = "MYSQL_PASSWORD",
-        value = var.mysql_password,
+        key = "MYSQL_PASSWORD"
+        value = var.mysql_password
         sensitive = true
+        target   = ["production", "preview", "development"]
     }
   ]
 }
