@@ -1,0 +1,51 @@
+name: CI/CD pipeline for client and lambda functions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # - name: Set up Terraform
+      #   uses: hashicorp/setup-terraform@v1
+
+      # - name: Configure AWS credentials
+      #   uses: aws-actions/configure-aws-credentials@v2
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
+
+      # - name: Terraform apply
+      #   env:
+      #     vercel_api_token: ${{ secrets.VERCEL_API_TOKEN }}
+      #     mysql_host: ${{ secrets.MYSQL_HOST }}
+      #     mysql_port: ${{ secrets.MYSQL_PORT }}
+      #     mysql_database: ${{ secrets.MYSQL_DATABASE }}
+      #     mysql_user: ${{ secrets.MYSQL_USER }}
+      #     mysql_password: ${{ secrets.MYSQL_PASSWORD }}
+      #     aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws_region: ${{ secrets.AWS_REGION }}
+      #   run: |
+      #     export TF_VAR_vercel_api_token=$vercel_api_token
+      #     export TF_VAR_mysql_host=$mysql_host
+      #     export TF_VAR_mysql_port=$mysql_port
+      #     export TF_VAR_mysql_database=$mysql_database
+      #     export TF_VAR_mysql_user=$mysql_user
+      #     export TF_VAR_mysql_password=$mysql_password
+      #     export TF_VAR_aws_access_key_id=$aws_access_key_id
+      #     export TF_VAR_aws_secret_access_key=$aws_secret_access_key
+      #     export TF_VAR_aws_region=$aws_region
+      #     cd terraform/
+      #     terraform init
+      #     terraform plan
+      #     terraform apply -auto-approve
+      #     echo "Done!"
