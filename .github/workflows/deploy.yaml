@@ -25,7 +25,7 @@ jobs:
 
       - name: Terraform apply
         env:
-          vercel_api_key: ${{ secrets.VERCEL_API_KEY }}
+          vercel_api_token: ${{ secrets.VERCEL_API_TOKEN }}
           mysql_host: ${{ secrets.MYSQL_HOST }}
           mysql_port: ${{ secrets.MYSQL_PORT }}
           mysql_database: ${{ secrets.MYSQL_DATABASE }}
@@ -35,7 +35,7 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
         run: |
-          export TF_VAR_vercel_api_key=$vercel_api_key
+          export TF_VAR_vercel_api_token=$vercel_api_token
           export TF_VAR_mysql_host=$mysql_host
           export TF_VAR_mysql_port=$mysql_port
           export TF_VAR_mysql_database=$mysql_database
