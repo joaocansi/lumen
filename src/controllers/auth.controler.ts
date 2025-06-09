@@ -8,7 +8,6 @@ authController.post("/register", async (c) => {
   try {
     const { email, password, name } = await c.req.json();
 
-    // Utilizando a função correta do Better Auth
     const { data, error } = await auth.client.signUp.email({
       email,
       password,
@@ -19,11 +18,6 @@ authController.post("/register", async (c) => {
       return c.json({ message: error.message || "Erro ao criar usuário" }, 400);
     }
 
-    // Criando perfil após a criação do usuário
-    if (name) {
-      await profileService.create(name, data.user.id);
-    }
-
     return c.json(
       { message: "Usuário criado com perfil", user: data.user },
       201
@@ -32,35 +26,31 @@ authController.post("/register", async (c) => {
     console.error(error);
     return c.json({ message: error.message || "Erro interno" }, 500);
   }
+});
 
-  authController.post("/login", async (c) => {
-    try {
-      const { email, password } = await c.req.json();
+//
+authController.post("/login", async (c) => {
+  try {
+    const { email, password } = await c.req.json();
 
-      // Autenticando usuário
-      const { data, error } = await auth.client.signIn.email({
-        email,
-        password,
-      });
+    const { data, error } = await auth.client.signIn.email({
+      email,
+      password,
+    });
 
-      if (error) {
-        return c.json(
-          { message: error.message || "Credenciais inválidas" },
-          401
-        );
-      }
-
-      return c.json(
-        { message: "Login bem-sucedido", user: data.user, token: data.token },
-        200
-      );
-    } catch (error: any) {
-      console.error(error);
-      return c.json({ message: error.message || "Erro interno" }, 500);
+    if (error) {
+      return c.json({ message: error.message || "Credenciais inválidas" }, 401);
     }
 
-    
-  });
+    return c.json(
+      { message: "Login bem-sucedido", user: data.user, token: data.token },
+      200
+    );
+  } catch (error: any) {
+    console.error(error);
+    return c.json({ message: error.message || "Erro interno" }, 500);
+  }
+});
 
 /* authController.post("/mock-user", async (c) => {
   const id = `mock-${Date.now()}`;

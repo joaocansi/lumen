@@ -4,14 +4,8 @@ import { ProfileRepositoryImpl } from "../repositories/prisma-profile.repository
 const profileRepository: ProfileRepository = new ProfileRepositoryImpl();
 
 export const profileService = {
-  findByUserId: async (userId: string) => {
-    const profile = await profileRepository.findByUserId(userId);
-    if (!profile) throw new Error("Profile não encontrado");
-    return profile;
-  },
-
-  getById: async (id: string) => {
-    const profile = await profileRepository.findById(id);
+  getById: async (userId: string) => {
+    const profile = await profileRepository.findByUserId(userId); // ✅ corrigido
     if (!profile) throw new Error("Profile não encontrado");
     return profile;
   },
