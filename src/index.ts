@@ -1,3 +1,6 @@
+import 'reflect-metadata';
+import './container/container.js';
+
 import 'dotenv/config';
 
 import { serve } from '@hono/node-server';
