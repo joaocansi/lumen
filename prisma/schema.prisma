@@ -1,4 +1,3 @@
-
 datasource db {
   url      = env("DATABASE_URL")
   provider = "mysql"
@@ -18,6 +17,10 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
+
+  // adicionando campo relacionado ao profile
+
+  profile Profile?
 
   @@unique([email])
   @@map("user")
@@ -66,4 +69,16 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  name      String   @db.Text
+  bio       String?  @db.Text
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profile")
 }
