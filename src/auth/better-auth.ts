@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
-import { profileService } from "../services/profile.service.js";
-
-const prisma = new PrismaClient();
+import { prisma } from "../database/prisma/prisma-client";
+import { container } from "tsyringe";
+import { ProfileService } from "../services/profile.service";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -16,9 +15,12 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (c) => {
-          await profileService.create(c.name || "Novo Usuário", c.id);
-          console.log(c);
-          // desse after, chama o serviço q cria o perfil do usuário
+          const profileService = container.resolve(ProfileService);
+          await profileService.createProfile({
+            bio: "",
+            name: c.name,
+            userId: c.id,
+          });
         },
       },
     },

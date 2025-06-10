@@ -21,15 +21,16 @@ export default [
         },
         rules: {
             "indent": ["error", 2],
-            "quotes": ["error", "single"],
+            "quotes": ["error", "double"],
             "semi": ["error", "always"],
             "linebreak-style": ["error", "unix"],
+            "no-unused-vars": "off",
             "eqeqeq": ["error", "always"],
             "max-len": ["error", { code: 100 }],
             "prettier/prettier": [
                 "error",
                 {
-                    singleQuote: true,
+                    singleQuote: false,
                     semi: true,
                     tabWidth: 2,
                     trailingComma: "es5",
