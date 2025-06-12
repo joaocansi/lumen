@@ -4,7 +4,7 @@ import type { ProfileEntity } from "../domain/profile/profile.entity.js";
 import type { ProfileRepository } from "../domain/profile/profile.repository.js";
 
 @injectable()
-export class ProfileRepositoryImpl implements ProfileRepository {
+export class PrismaProfileRepository implements ProfileRepository {
   async findById(id: string): Promise<ProfileEntity | null> {
     return prisma.profile.findUnique({ where: { id } });
   }
