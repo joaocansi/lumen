@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "commonjs",
+    "target": "esnext",
+    "module": "esnext",
     "moduleResolution": "Node",
+    "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
