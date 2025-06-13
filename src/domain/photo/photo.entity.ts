@@ -2,7 +2,7 @@ import { Photo } from "./photo";
 
 export class PhotoEntity {
   id: string;
-  profileId: string;
+  userId: string;
   caption: string;
   url: string;
   createdAt: Date;
@@ -13,7 +13,6 @@ export class PhotoEntity {
       id: photo.id,
       url: photo.url,
       caption: photo.caption,
-      profileId: photo.profileId,
       uploadedAt: photo.createdAt,
     };
   }

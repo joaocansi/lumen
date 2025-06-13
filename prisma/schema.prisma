@@ -1,10 +1,11 @@
-datasource db {
-  url      = env("DATABASE_URL")
-  provider = "mysql"
-}
 
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -15,14 +16,17 @@ model User {
   image         String?   @db.Text
   createdAt     DateTime
   updatedAt     DateTime
+  bio           String?   @db.Text
+  username      String
   sessions      Session[]
   accounts      Account[]
-
-  // adicionando campo relacionado ao profile
-
-  profile Profile?
+  photos        Photo[]
+  
+  followers     Follow[]  @relation("Following")
+  following     Follow[]  @relation("FollowedBy")
 
   @@unique([email])
+  @@unique([username])
   @@map("user")
 }
 
@@ -71,27 +75,28 @@ model Verification {
   @@map("verification")
 }
 
-model Profile {
+model Photo {
   id        String   @id @default(uuid())
-  name      String   @db.Text
-  bio       String?  @db.Text
-  userId    String   @unique
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  photos    Photo[]
+  url       String   @db.Text
+  caption   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("profile")
-}
-
-model Photo {
-  id        String    @id @default(uuid())
-  profileId String
-  profile   Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
-  url       String    @db.Text
-  caption   String    @db.Text
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
   @@map("photo")
 }
+
+model Follow {
+  id         String   @id @default(uuid())
+  followerId String
+  followingId String
+  createdAt  DateTime @default(now())
+
+  follower   User     @relation("FollowedBy", fields: [followerId], references: [id], onDelete: Cascade)
+  following  User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId]) // Prevent duplicate follows
+  @@map("follow")
+}
+
