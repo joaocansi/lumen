@@ -10,21 +10,25 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       bio: {
-        type: 'string',
+        type: "string",
         required: false,
-        fieldName: 'bio'
+        fieldName: "bio",
       },
       username: {
         required: true,
-        type: 'string',
+        type: "string",
         unique: true,
         validator: {
-          input: z.string()
+          input: z
+            .string()
             .min(3, "Username must be at least 3 characters long")
             .max(20, "Username must be at most 20 characters long")
-            .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores are allowed"),
-        }
-      }
+            .regex(
+              /^[a-zA-Z0-9_]+$/,
+              "Only letters, numbers, and underscores are allowed",
+            ),
+        },
+      },
     },
   },
   emailAndPassword: {
