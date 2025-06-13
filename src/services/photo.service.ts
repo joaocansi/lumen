@@ -15,6 +15,18 @@ type NewPhotoInput = {
 
 type NewPhotoOutput = Photo;
 
+type GetPhotosByProfileInput = {
+  limit: number;
+  offset: number;
+  username: string;
+}
+
+type GetPhotosByProfileOutput = {
+  photos: Photo[];
+  total: number;
+  hasMore: boolean;
+}
+
 @injectable()
 export class PhotoService {
   constructor(
@@ -27,16 +39,31 @@ export class PhotoService {
   ) {}
 
   async newPhoto(data: NewPhotoInput): Promise<NewPhotoOutput> {
-    const profile = await this.profileRepository.findByUserId(data.userId);
+    const profile = await this.profileRepository.findById(data.userId);
     if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);
 
     const uploadedFileHash = await this.fileUploader.upload(data.image);
     const photo = await this.photoRepository.create({
       caption: data.caption,
-      profileId: profile.id,
+      userId: profile.id,
       url: uploadedFileHash,
     });
 
     return PhotoEntity.toDomain(photo);
+  }
+
+  async getPhotosByProfile(data: GetPhotosByProfileInput): Promise<GetPhotosByProfileOutput> {
+    const profile = await this.profileRepository.findByUsername(data.username);
+    if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);      
+
+    const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset);
+    const photosDomain = photos['photos'].map(item => {
+      return PhotoEntity.toDomain(item)
+    });
+
+    return {
+      ...photos,
+      photos: photosDomain
+    };
   }
 }

@@ -2,18 +2,17 @@ import { Profile } from "./profile";
 
 export class ProfileEntity {
   id: string;
+  username: string;
   name: string;
   bio: string | null;
-  userId: string;
   createdAt: Date;
   updatedAt: Date;
 
-  static toDomain(profile: ProfileEntity): Profile {
+  static toDomain(photo: ProfileEntity): Profile {
     return {
-      id: profile.id,
-      bio: profile.bio,
-      name: profile.name,
-      userId: profile.userId,
+        bio: photo.bio ?? undefined,
+        name: photo.name,
+        username: photo.username
     };
   }
 }

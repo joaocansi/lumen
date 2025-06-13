@@ -20,6 +20,7 @@ export class ProfileController extends Hono {
 
     this.get("/:profileId", this.getProfile.bind(this));
     this.patch("/", mustBeAuthenticated, this.updateProfile.bind(this));
+    this.post("/follow/:username", mustBeAuthenticated, this.followProfile.bind(this));
   }
 
   async getProfile(c: HonoContext) {
@@ -40,5 +41,19 @@ export class ProfileController extends Hono {
       ...updateData,
     });
     return c.json(updatedProfile);
+  }
+
+  async followProfile(c: HonoContext) {
+    const username = c.req.param("username");
+    const user = c.get("user");
+
+    if (!user) return ServiceError.internalServerError(c);
+
+    await this.profileService.followProfile({
+      followerId: user.id,
+      followingUsername: username,
+    });
+
+    return c.json({ success: true });
   }
 }

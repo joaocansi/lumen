@@ -1,8 +1,7 @@
-import type { ProfileEntity } from "./profile.entity.js";
+import { ProfileEntity } from "./profile.entity";
 
 export interface ProfileRepository {
   findById(id: string): Promise<ProfileEntity | null>;
-  findByUserId(userId: string): Promise<ProfileEntity | null>;
-  create(profile: Omit<ProfileEntity, "id" | "createdAt" | "updatedAt">): Promise<ProfileEntity>;
+  findByUsername(username: string): Promise<ProfileEntity | null>;
   update(id: string, data: Partial<ProfileEntity>): Promise<ProfileEntity>;
 }

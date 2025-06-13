@@ -10,14 +10,6 @@ type GetProfileByIdInput = {
 
 type GetProfileByIdOutput = Profile;
 
-type CreateProfileInput = {
-  name: string;
-  bio: string;
-  userId: string;
-};
-
-type CreateProfileOutput = Profile;
-
 type UpdateProfileInput = {
   userId: string;
   name?: string;
@@ -25,6 +17,11 @@ type UpdateProfileInput = {
 };
 
 type UpdateProfileOutput = Profile;
+
+type FollowProfileInput = {
+  followerId: string;
+  followingUsername: string;
+};
 
 @injectable()
 export class ProfileService {
@@ -39,18 +36,36 @@ export class ProfileService {
     return ProfileEntity.toDomain(profile);
   }
 
-  async createProfile(data: CreateProfileInput): Promise<CreateProfileOutput> {
-    const profile = await this.profileRepository.findByUserId(data.userId);
-    if (profile) throw new ServiceError("Perfil já criado", ServiceErrorType.AlreadyExists);
-    const createdProfile = await this.profileRepository.create(data);
-    return ProfileEntity.toDomain(createdProfile);
+  async updateProfile(data: UpdateProfileInput): Promise<UpdateProfileOutput> {
+    const profile = await this.profileRepository.findById(data.userId)
+    if (!profile) throw new ServiceError("Perfil não existe", ServiceErrorType.NotFound);
+    const { userId, ...updateData } = data;
+    const updatedProfile = await this.profileRepository.update(userId, { ...updateData });
+    return ProfileEntity.toDomain(updatedProfile);
   }
 
-  async updateProfile(data: UpdateProfileInput): Promise<UpdateProfileOutput> {
-    const profile = await this.profileRepository.findByUserId(data.userId);
-    if (!profile) throw new ServiceError("Perfil não criado", ServiceErrorType.NotFound);
-    const { userId, ...updateData } = data;
-    const updatedProfile = await this.profileRepository.update(profile.id, { ...updateData });
-    return ProfileEntity.toDomain(updatedProfile);
+  async followProfile(data: FollowProfileInput): Promise<void> {
+    const { followerId, followingUsername } = data;
+
+    const follower = await this.profileRepository.findById(followerId);
+    if (!follower) {
+      throw new ServiceError("Perfil (seguidor) não existe", ServiceErrorType.NotFound);
+    }
+
+    const following = await this.profileRepository.findByUsername(followingUsername);
+    if (!following) {
+      throw new ServiceError("Perfil (seguido) não encontrado", ServiceErrorType.NotFound);
+    }
+
+    if (follower.id === following.id) {
+      throw new ServiceError("Você não pode seguir a si mesmo", ServiceErrorType.BadRequest);
+    }
+
+    // const alreadyFollowing = await this.profileRepository.isFollowing(follower.id, following.id);
+    // if (alreadyFollowing) {
+    //   throw new ServiceError("Você já está seguindo este usuário", ServiceErrorType.BadRequest);
+    // }
+
+    // await this.profileRepository.follow(follower.id, following.id);
   }
 }
