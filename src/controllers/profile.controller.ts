@@ -14,19 +14,28 @@ type UpdateProfileData = {
 export class ProfileController extends Hono {
   constructor(
     @inject("ProfileService")
-    private profileService: ProfileService
+    private profileService: ProfileService,
   ) {
     super();
 
-    this.get("/:profileId", this.getProfile.bind(this));
+    this.get("/username/:username", this.getProfileByUsername.bind(this));
     this.patch("/", mustBeAuthenticated, this.updateProfile.bind(this));
-    this.post("/follow/:username", mustBeAuthenticated, this.followProfile.bind(this));
+    this.post(
+      "/follow/:username",
+      mustBeAuthenticated,
+      this.followProfile.bind(this),
+    );
+
+    this.get("/username/:username/followers", this.getFollowers.bind(this));
+    this.get("/username/:username/following", this.getFollowing.bind(this));
   }
 
-  async getProfile(c: HonoContext) {
-    const profileId = c.req.param("profileId");
-    const getProfileById = await this.profileService.getProfileById({ profileId });
-    return c.json(getProfileById);
+  async getProfileByUsername(c: HonoContext) {
+    const username = c.req.param("username");
+    const profile = await this.profileService.getProfileByUsername({
+      username,
+    });
+    return c.json(profile);
   }
 
   async updateProfile(c: HonoContext) {
@@ -55,5 +64,17 @@ export class ProfileController extends Hono {
     });
 
     return c.json({ success: true });
+  }
+
+  async getFollowers(c: HonoContext) {
+    const username = c.req.param("username");
+    const followers = await this.profileService.getFollowers(username);
+    return c.json(followers);
+  }
+
+  async getFollowing(c: HonoContext) {
+    const username = c.req.param("username");
+    const following = await this.profileService.getFollowing(username);
+    return c.json(following);
   }
 }

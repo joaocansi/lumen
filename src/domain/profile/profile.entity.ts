@@ -8,11 +8,11 @@ export class ProfileEntity {
   createdAt: Date;
   updatedAt: Date;
 
-  static toDomain(photo: ProfileEntity): Profile {
+  static toDomain(entity: ProfileEntity): Profile {
     return {
-        bio: photo.bio ?? undefined,
-        name: photo.name,
-        username: photo.username
+      username: entity.username,
+      name: entity.name,
+      bio: entity.bio ?? undefined,
     };
   }
 }

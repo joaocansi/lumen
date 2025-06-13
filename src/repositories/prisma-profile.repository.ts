@@ -13,7 +13,59 @@ export class PrismaProfileRepository implements ProfileRepository {
     return prisma.user.findUnique({ where: { username } });
   }
 
-  async update(id: string, data: Partial<ProfileEntity>): Promise<ProfileEntity> {
+  async update(
+    id: string,
+    data: Partial<ProfileEntity>,
+  ): Promise<ProfileEntity> {
     return prisma.user.update({ where: { id }, data });
+  }
+
+  async follow(followerId: string, followingId: string): Promise<void> {
+    await prisma.follow.create({
+      data: {
+        followerId,
+        followingId,
+      },
+    });
+  }
+
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const follow = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
+      },
+    });
+    return !!follow;
+  }
+  async unfollow(followerId: string, followingId: string): Promise<void> {
+    await prisma.follow.delete({
+      where: {
+        followerId_followingId: {
+          followerId,
+          followingId,
+        },
+      },
+    });
+  }
+
+  async getFollowers(username: string): Promise<ProfileEntity[]> {
+    const followers = await prisma.follow.findMany({
+      where: { followingId: username },
+      include: { follower: true },
+    });
+
+    return followers.map((f) => f.follower);
+  }
+
+  async getFollowing(username: string): Promise<ProfileEntity[]> {
+    const following = await prisma.follow.findMany({
+      where: { followerId: username },
+      include: { following: true },
+    });
+
+    return following.map((f) => f.following);
   }
 }
