@@ -40,6 +40,7 @@ export class PhotoController extends Hono {
       const photo = await this.photoService.newPhoto(data)
       return c.json(photo, 201)   
     } catch (error) {
+      console.log(error);
       throw new ServiceError("Dados incorretos", ServiceErrorType.BadRequest);   
     }
   }

@@ -96,7 +96,6 @@ model Follow {
   follower   User     @relation("FollowedBy", fields: [followerId], references: [id], onDelete: Cascade)
   following  User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
 
-  @@unique([followerId, followingId]) // Prevent duplicate follows
+  @@unique([followerId, followingId])
   @@map("follow")
 }
-

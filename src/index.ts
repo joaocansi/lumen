@@ -43,7 +43,6 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 
 app.onError((err, c) => {
   if (err instanceof ServiceError) return err.toApiError(c);
-  console.log(err);
   return ServiceError.internalServerError(c);
 });
 

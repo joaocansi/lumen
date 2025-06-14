@@ -1,15 +1,13 @@
-import { PhotoEntity } from "./photo.entity";
+import { Paginated } from "../../@types/paginated";
+import { Photo } from "./photo";
 
-export type PaginatedPhotoEntity = {
-  photos: PhotoEntity[];
-  total: number;
-  hasMore: boolean;
-}
+export type CreatePhotoData = Omit<Photo, "id" | "createdAt" | "updatedAt" | "uploadedAt"> & { userId: string };
+export type UpdatePhotoData = Partial<Omit<Photo, 'userId'>>;
 
 export interface PhotoRepository {
-  findById(id: string): Promise<PhotoEntity | null>;
-  create(photo: Omit<PhotoEntity, "id" | "createdAt" | "updatedAt">): Promise<PhotoEntity>;
-  update(id: string, data: Partial<PhotoEntity>): Promise<PhotoEntity>;
-  get(limit: number, offset: number): Promise<PaginatedPhotoEntity>;
-  getByUserId(userId: string, limit: number, offset: number): Promise<PaginatedPhotoEntity>;
+  findById(id: string): Promise<Photo | null>;
+  create(photo: CreatePhotoData): Promise<Photo>;
+  update(id: string, data: UpdatePhotoData): Promise<Photo>;
+  get(limit: number, offset: number): Promise<Paginated<Photo[]>>;
+  getByUserId(userId: string, limit: number, offset: number): Promise<Paginated<Photo[]>>;
 }
