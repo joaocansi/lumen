@@ -1,56 +1,62 @@
 import { injectable } from "tsyringe";
 import { prisma } from "../database/prisma/prisma-client.js";
-import type { PhotoEntity } from "../domain/photo/photo.entity.js";
-import type { PaginatedPhotoEntity, PhotoRepository } from "../domain/photo/photo.repository.js";
+import type { CreatePhotoData, PhotoRepository, UpdatePhotoData } from "../domain/photo/photo.repository.js";
+import { Photo } from "../domain/photo/photo.js";
+import { PrismaPhotoMapper } from "./prisma-photo.mapper.js";
+import { Paginated } from "../@types/paginated.js";
 
 @injectable()
 export class PrismaPhotoRepository implements PhotoRepository {
-  async findById(id: string): Promise<PhotoEntity | null> {
-    return prisma.photo.findUnique({ where: { id } });
+  async findById(id: string): Promise<Photo | null> {
+    const result = await prisma.photo.findUnique({ where: { id } });
+    return result && PrismaPhotoMapper.toPhoto(result);
   }
 
-  async create(
-    photo: Omit<PhotoEntity, "id" | "createdAt" | "updatedAt">
-  ): Promise<PhotoEntity> {
-    return prisma.photo.create({ data: photo });
+  async create(data: CreatePhotoData): Promise<Photo> {
+    const result = await prisma.photo.create({ data });
+    return result && PrismaPhotoMapper.toPhoto(result);
   }
 
-  async update(id: string, data: Partial<PhotoEntity>): Promise<PhotoEntity> {
-    return prisma.photo.update({ where: { id }, data });
+  async update(id: string, data: UpdatePhotoData): Promise<Photo> {
+    const result = await prisma.photo.update({ where: { id }, data });
+    return result && PrismaPhotoMapper.toPhoto(result);
   }
 
-  async get(limit: number, offset: number): Promise<PaginatedPhotoEntity> {
+  async get(limit: number, offset: number): Promise<Paginated<Photo[]>> {
     const [photos, total] = await Promise.all([
       prisma.photo.findMany({
+        orderBy: { createdAt: "desc" },
         skip: offset,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        include: {
+          user: true,
+        }
       }),
       prisma.photo.count(),
     ]);
 
     return {
-      photos,
+      data: photos.map(PrismaPhotoMapper.toPhotoWithUser),
       total,
       hasMore: offset + photos.length < total,
     };
   }
 
-  async getByUserId(userId: string, limit: number, offset: number): Promise<PaginatedPhotoEntity> {
+  async getByUserId(userId: string, limit: number, offset: number): Promise<Paginated<Photo[]>> {
     const [photos, total] = await Promise.all([
       prisma.photo.findMany({
+        orderBy: { createdAt: "desc" },
         skip: offset,
         take: limit,
         where: {
           userId
         },
-        orderBy: { createdAt: "desc" },
       }),
       prisma.photo.count({ where: { userId } }),
     ]);
 
     return {
-      photos,
+      data: photos.map(PrismaPhotoMapper.toPhoto),
       total,
       hasMore: offset + photos.length < total,
     };

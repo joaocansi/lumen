@@ -4,3 +4,11 @@ export class Photo {
   url: string;
   uploadedAt: Date;
 }
+
+export type PhotoWithUser = Photo & {
+  user: {
+    name: string;
+    username: string;
+    image: string | null;
+  }
+}

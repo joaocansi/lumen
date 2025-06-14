@@ -5,7 +5,7 @@ import { FileUploaderProvider } from "../domain/file-uploader-provider";
 import { Photo } from "../domain/photo/photo";
 import { ProfileRepository } from "../domain/profile/profile.repository";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
-import { PhotoEntity } from "../domain/photo/photo.entity";
+import { Paginated } from "../@types/paginated";
 
 type NewPhotoInput = {
   image: File;
@@ -21,11 +21,7 @@ type GetPhotosByProfileInput = {
   username: string;
 }
 
-type GetPhotosByProfileOutput = {
-  photos: Photo[];
-  total: number;
-  hasMore: boolean;
-}
+type GetPhotosByProfileOutput = Paginated<Photo[]>
 
 @injectable()
 export class PhotoService {
@@ -49,7 +45,7 @@ export class PhotoService {
       url: uploadedFileHash,
     });
 
-    return PhotoEntity.toDomain(photo);
+    return photo
   }
 
   async getPhotosByProfile(data: GetPhotosByProfileInput): Promise<GetPhotosByProfileOutput> {
@@ -57,13 +53,6 @@ export class PhotoService {
     if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);      
 
     const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset);
-    const photosDomain = photos['photos'].map(item => {
-      return PhotoEntity.toDomain(item)
-    });
-
-    return {
-      ...photos,
-      photos: photosDomain
-    };
+    return photos;
   }
 }

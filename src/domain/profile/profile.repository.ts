@@ -1,14 +1,17 @@
-import { ProfileEntity } from "./profile.entity";
+import { Profile } from "./profile";
+
+type UpdateProfileData = Partial<Omit<Profile, 'id'>>;
 
 export interface ProfileRepository {
-  findById(id: string): Promise<ProfileEntity | null>;
-  findByUsername(username: string): Promise<ProfileEntity | null>;
-  update(id: string, data: Partial<ProfileEntity>): Promise<ProfileEntity>;
+  findById(id: string): Promise<Profile | null>;
+  findByUsername(username: string): Promise<Profile | null>;
+
+  update(id: string, data: UpdateProfileData): Promise<Profile>;
 
   follow(followerId: string, followingId: string): Promise<void>;
   isFollowing(followerId: string, followingId: string): Promise<boolean>;
   unfollow(followerId: string, followingId: string): Promise<void>;
 
-  getFollowers(username: string): Promise<ProfileEntity[]>;
-  getFollowing(username: string): Promise<ProfileEntity[]>;
+  getFollowers(username: string): Promise<Profile[]>;
+  getFollowing(username: string): Promise<Profile[]>;
 }

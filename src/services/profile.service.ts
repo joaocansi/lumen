@@ -1,7 +1,6 @@
 import { inject, injectable } from "tsyringe";
 import type { ProfileRepository } from "../domain/profile/profile.repository";
 import { Profile } from "../domain/profile/profile";
-import { ProfileEntity } from "../domain/profile/profile.entity";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
 import { prisma } from "../database/prisma/prisma-client";
 
@@ -46,8 +45,9 @@ export class ProfileService {
       where: { followerId: profile.id },
     });
 
-    return { ...ProfileEntity.toDomain(profile), followers, following };
+    return { ...profile, followers, following };
   }
+  
   async updateProfile(data: UpdateProfileInput): Promise<UpdateProfileOutput> {
     const profile = await this.profileRepository.findById(data.userId);
     if (!profile)
@@ -56,7 +56,7 @@ export class ProfileService {
     const updatedProfile = await this.profileRepository.update(userId, {
       ...updateData,
     });
-    return ProfileEntity.toDomain(updatedProfile);
+    return updatedProfile;
   }
 
   async getFollowers(username: string): Promise<Profile[]> {
@@ -69,7 +69,7 @@ export class ProfileService {
     }
 
     const followers = await this.profileRepository.getFollowers(profile.id);
-    return followers.map(ProfileEntity.toDomain);
+    return followers;
   }
 
   async getFollowing(username: string): Promise<Profile[]> {
@@ -82,7 +82,7 @@ export class ProfileService {
     }
 
     const following = await this.profileRepository.getFollowing(profile.id);
-    return following.map(ProfileEntity.toDomain);
+    return following;
   }
 
   async followProfile(data: FollowProfileInput): Promise<void> {
