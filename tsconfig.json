@@ -1,19 +1,28 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "commonjs",
-    "moduleResolution": "Node",
-    "strict": true,
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
-    "emitDecoratorMetadata": true,
-    "types": [
-      "node"
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
     ],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "outDir": "./dist"
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
