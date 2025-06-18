@@ -1,0 +1,80 @@
+import { Hono } from "hono";
+import { ProfileService } from "../services/profile.service.js";
+import { inject, injectable } from "tsyringe";
+import { HonoContext } from "../@types/hono-context.js";
+import { mustBeAuthenticated } from "../middlewares/must-be-authenticated.js";
+import ServiceError from "../errors/ServiceError.js";
+
+type UpdateProfileData = {
+  name?: string;
+  bio?: string;
+};
+
+@injectable()
+export class ProfileController extends Hono {
+  constructor(
+    @inject("ProfileService")
+    private profileService: ProfileService,
+  ) {
+    super();
+
+    this.get("/username/:username", this.getProfileByUsername.bind(this));
+    this.patch("/", mustBeAuthenticated, this.updateProfile.bind(this));
+    this.post(
+      "/follow/:username",
+      mustBeAuthenticated,
+      this.followProfile.bind(this),
+    );
+
+    this.get("/username/:username/followers", this.getFollowers.bind(this));
+    this.get("/username/:username/following", this.getFollowing.bind(this));
+  }
+
+  async getProfileByUsername(c: HonoContext) {
+    const username = c.req.param("username");
+    const profile = await this.profileService.getProfileByUsername({
+      username,
+    });
+    return c.json(profile);
+  }
+
+  async updateProfile(c: HonoContext) {
+    const updateData: UpdateProfileData = await c.req.json();
+    const user = c.get("user");
+
+    if (!user) return ServiceError.internalServerError(c);
+
+    console.log(updateData);
+    const updatedProfile = await this.profileService.updateProfile({
+      userId: user.id,
+      ...updateData,
+    });
+    return c.json(updatedProfile);
+  }
+
+  async followProfile(c: HonoContext) {
+    const username = c.req.param("username");
+    const user = c.get("user");
+
+    if (!user) return ServiceError.internalServerError(c);
+
+    await this.profileService.followProfile({
+      followerId: user.id,
+      followingUsername: username,
+    });
+
+    return c.json({ success: true });
+  }
+
+  async getFollowers(c: HonoContext) {
+    const username = c.req.param("username");
+    const followers = await this.profileService.getFollowers(username);
+    return c.json(followers);
+  }
+
+  async getFollowing(c: HonoContext) {
+    const username = c.req.param("username");
+    const following = await this.profileService.getFollowing(username);
+    return c.json(following);
+  }
+}
