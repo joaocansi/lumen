@@ -4,6 +4,7 @@ import { prisma } from "../database/prisma/prisma-client";
 import { z } from "zod";
 
 export const auth = betterAuth({
+  trustedOrigins: ["http://localhost:3001"],
   database: prismaAdapter(prisma, {
     provider: "mysql",
   }),

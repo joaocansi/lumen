@@ -9,7 +9,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full h-full min-h-screen grid grid-cols-2 max-md:grid-cols-1">
+    <div className="w-full h-full min-h-screen grid grid-cols-2 max-lg:grid-cols-1">
       <div className="w-full col-span-1 h-full flex flex-col items-center justify-between">
         <div className="flex justify-between w-full px-4 pt-2">
           <h1 className="flex text-2xl font-black gap-2">
@@ -32,7 +32,7 @@ export default function AuthLayout({
         <div />
       </div>
 
-      <div className="w-full col-span-1 h-full flex items-center justify-center flex-col bg-[url(/background.jpg)] bg-cover bg-center max-md:hidden" />
+      <div className="w-full col-span-1 h-full flex items-center justify-center flex-col bg-[url(/background.jpg)] bg-cover bg-center max-lg:hidden" />
     </div>
   );
 }
