@@ -6,6 +6,7 @@ import { Photo } from "../domain/photo/photo";
 import { ProfileRepository } from "../domain/profile/profile.repository";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
 import { Paginated } from "../@types/paginated";
+import { LikeRepository } from "../domain/like/like.repository";
 
 type NewPhotoInput = {
   image: File;
@@ -28,11 +29,19 @@ export class PhotoService {
   constructor(
     @inject("PhotoRepository")
     private photoRepository: PhotoRepository,
+    @inject("LikeRepository")
+    private likeRepository: LikeRepository,
     @inject("ProfileRepository")
     private profileRepository: ProfileRepository,
     @inject("FileUploaderProvider")
     private fileUploader: FileUploaderProvider
   ) {}
+
+  async getPhotoById(photoId: string, sessionUserId?: string) {
+    const photo = await this.photoRepository.findByIdWithMetadata(photoId, sessionUserId);
+    if (!photo) throw new ServiceError("Foto não encontrada", ServiceErrorType.NotFound);
+    return photo;
+  }
 
   async newPhoto(data: NewPhotoInput): Promise<NewPhotoOutput> {
     const profile = await this.profileRepository.findById(data.userId);
@@ -54,5 +63,19 @@ export class PhotoService {
 
     const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset);
     return photos;
+  }
+
+  async unlikePhoto(photoId: string, id: string) {
+    const isLiked = await this.likeRepository.isLiked(photoId, id);
+    if (!isLiked)
+      throw new ServiceError("Foto não curtida", ServiceErrorType.NotFound);
+    return this.likeRepository.unlikePhoto(photoId, id);
+  }
+
+  async likePhoto(photoId: string, id: string) {
+    const isLiked = await this.likeRepository.isLiked(photoId, id);
+    if (isLiked)
+      throw new ServiceError("Foto já curtida", ServiceErrorType.AlreadyExists);
+    return this.likeRepository.likePhoto(photoId, id)
   }
 }
