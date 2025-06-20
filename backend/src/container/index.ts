@@ -12,18 +12,35 @@ import { PrismaPhotoRepository } from "../repositories/prisma-photo.repository";
 
 import { LikeRepository } from "../domain/like/like.repository";
 import { PrismaLikeRepository } from "../repositories/prisma-like.repository";
+import { AuthController } from "../controllers/AuthController";
 
 container.registerSingleton<FileUploaderProvider>(
   "FileUploaderProvider",
-  LocalFileUploaderProvider
+  LocalFileUploaderProvider,
 );
 
-container.registerSingleton<ProfileRepository>("ProfileRepository", PrismaProfileRepository);
+container.registerSingleton<ProfileRepository>(
+  "ProfileRepository",
+  PrismaProfileRepository,
+);
 container.registerSingleton<ProfileService>("ProfileService", ProfileService);
-container.registerSingleton<ProfileController>("ProfileController", ProfileController);
+container.registerSingleton<ProfileController>(
+  "ProfileController",
+  ProfileController,
+);
+container.registerSingleton<AuthController>("AuthController", AuthController);
 
-container.registerSingleton<LikeRepository>("LikeRepository", PrismaLikeRepository);
+container.registerSingleton<LikeRepository>(
+  "LikeRepository",
+  PrismaLikeRepository,
+);
 
-container.registerSingleton<PhotoRepository>("PhotoRepository", PrismaPhotoRepository);
+container.registerSingleton<PhotoRepository>(
+  "PhotoRepository",
+  PrismaPhotoRepository,
+);
 container.registerSingleton<PhotoService>("PhotoService", PhotoService);
-container.registerSingleton<PhotoController>("PhotoController", PhotoController);
+container.registerSingleton<PhotoController>(
+  "PhotoController",
+  PhotoController,
+);

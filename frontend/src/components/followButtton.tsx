@@ -2,29 +2,40 @@
 
 import { useState } from "react";
 
+interface FollowButtonProps {
+  username: string;
+  initialIsFollowing: boolean;
+  onFollowChange?: (isFollowing: boolean) => void;
+}
+
 export default function FollowButton({
   username,
-  initialIsFollowing = false,
-}: {
-  username: string;
-  initialIsFollowing?: boolean;
-}) {
+  initialIsFollowing,
+  onFollowChange,
+}: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [loading, setLoading] = useState(false);
 
   const toggleFollow = async () => {
     setLoading(true);
     try {
-      await fetch(
-        `http://localhost:3001/profile/${isFollowing ? "unfollow" : "follow"}/${username}`,
+      const method = isFollowing ? "DELETE" : "POST";
+      const response = await fetch(
+        `http://localhost:3000/api/profile/follow/${username}`,
         {
-          method: isFollowing ? "DELETE" : "POST",
+          method,
           credentials: "include",
         },
       );
-      setIsFollowing(!isFollowing);
+
+      if (!response.ok) throw new Error("Failed to follow/unfollow");
+
+      const newIsFollowing = !isFollowing;
+      setIsFollowing(newIsFollowing);
+      onFollowChange?.(newIsFollowing); // Chamada opcional para callback
     } catch (err) {
-      alert("Erro ao seguir/desseguir");
+      console.error("Follow error:", err);
+      // Aqui você pode adicionar toast.error() ou outro feedback
     } finally {
       setLoading(false);
     }

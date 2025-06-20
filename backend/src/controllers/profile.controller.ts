@@ -3,6 +3,7 @@ import { ProfileService } from "../services/profile.service.js";
 import { inject, injectable } from "tsyringe";
 import { HonoContext } from "../@types/hono-context.js";
 import { mustBeAuthenticated } from "../middlewares/must-be-authenticated.js";
+import { isAuthenticated } from "../middlewares/is-authenticated.js";
 import ServiceError from "../errors/ServiceError.js";
 
 type UpdateProfileData = {
@@ -18,14 +19,19 @@ export class ProfileController extends Hono {
   ) {
     super();
 
-    this.get("/username/:username", this.getProfileByUsername.bind(this));
+    this.get(
+      "/username/:username",
+      isAuthenticated,
+      this.getProfileByUsername.bind(this),
+    );
     this.patch("/", mustBeAuthenticated, this.updateProfile.bind(this));
     this.post(
       "/follow/:username",
       mustBeAuthenticated,
       this.followProfile.bind(this),
     );
-    this.delete("/follow/:username",
+    this.delete(
+      "/follow/:username",
       mustBeAuthenticated,
       this.unfollowProfile.bind(this),
     );
@@ -36,8 +42,12 @@ export class ProfileController extends Hono {
 
   async getProfileByUsername(c: HonoContext) {
     const username = c.req.param("username");
+    const user = c.get("user");
+    console.log("Usuário logado é:", user);
+
     const profile = await this.profileService.getProfileByUsername({
       username,
+      currentUserId: user?.id,
     });
     return c.json(profile);
   }
@@ -60,6 +70,11 @@ export class ProfileController extends Hono {
     const user = c.get("user");
 
     if (!user) return ServiceError.internalServerError(c);
+
+    // Impede que usuário siga a si mesmo
+    if (user.username === username) {
+      return c.json({ error: "Você não pode seguir a si mesmo" }, 400);
+    }
 
     await this.profileService.followProfile({
       followerId: user.id,
