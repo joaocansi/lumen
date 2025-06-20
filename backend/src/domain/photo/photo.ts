@@ -12,3 +12,8 @@ export type PhotoWithUser = Photo & {
     image: string | null;
   }
 }
+
+export type PhotoWithMetadata = PhotoWithUser & {
+  likesCount: number;
+  isLiked: boolean; // Indicates if the session user has liked this photo
+};

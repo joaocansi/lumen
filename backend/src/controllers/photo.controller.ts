@@ -5,6 +5,7 @@ import { HonoContext } from "../@types/hono-context";
 import { z } from "zod";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
 import { mustBeAuthenticated } from "../middlewares/must-be-authenticated";
+import { isAuthenticated } from "../middlewares/is-authenticated";
 
 const newPhotoSchema = z.object({
   caption: z.string().min(1, "Caption is required"),
@@ -26,7 +27,18 @@ export class PhotoController extends Hono {
   ) {
     super();
     this.post("/", mustBeAuthenticated, this.newPhoto.bind(this));
-    this.get("/:username", this.getPhotosByProfile.bind(this));
+    this.get("/user/:username", this.getPhotosByProfile.bind(this));
+    this.get('/:photoId', isAuthenticated, this.getPhotoById.bind(this));
+    this.post("/:photoId/like", mustBeAuthenticated, this.likePhoto.bind(this));
+    this.delete("/:photoId/like", mustBeAuthenticated, this.unlikePhoto.bind(this));
+  }
+
+  async getPhotoById(c: HonoContext) {
+    const photoId = c.req.param('photoId');
+    const user = c.get("user")
+
+    const photo = await this.photoService.getPhotoById(photoId, user?.id);
+    return c.json(photo);
   }
 
   async newPhoto(c: HonoContext) {
@@ -35,14 +47,9 @@ export class PhotoController extends Hono {
 
     body['userId'] = user?.id as string
 
-    try {
-      const data = await newPhotoSchema.parseAsync(body);
-      const photo = await this.photoService.newPhoto(data)
-      return c.json(photo, 201)   
-    } catch (error) {
-      console.log(error);
-      throw new ServiceError("Dados incorretos", ServiceErrorType.BadRequest);   
-    }
+    const data = await newPhotoSchema.parseAsync(body);
+    const photo = await this.photoService.newPhoto(data)
+    return c.json(photo, 201)
   }
 
   async getPhotosByProfile(c: HonoContext) {
@@ -57,5 +64,27 @@ export class PhotoController extends Hono {
       console.log(error)
       throw new ServiceError("Dados incorretos", ServiceErrorType.BadRequest);   
     }
+  }
+
+  async likePhoto(c: HonoContext) {
+    const photoId = c.req.param('photoId');
+    const user = c.get("user");
+
+    if (!user) {
+      throw new ServiceError("Usuário não autenticado", ServiceErrorType.Unauthorized);
+    }
+
+    await this.photoService.likePhoto(photoId, user.id);
+  }
+
+  async unlikePhoto(c: HonoContext) {
+    const photoId = c.req.param('photoId');
+    const user = c.get("user");
+
+    if (!user) {
+      throw new ServiceError("Usuário não autenticado", ServiceErrorType.Unauthorized);
+    }
+
+    await this.photoService.unlikePhoto(photoId, user.id);
   }
 }

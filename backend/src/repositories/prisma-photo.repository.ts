@@ -1,12 +1,45 @@
 import { injectable } from "tsyringe";
 import { prisma } from "../database/prisma/prisma-client.js";
 import type { CreatePhotoData, PhotoRepository, UpdatePhotoData } from "../domain/photo/photo.repository.js";
-import { Photo } from "../domain/photo/photo.js";
+import { Photo, PhotoWithMetadata } from "../domain/photo/photo.js";
 import { PrismaPhotoMapper } from "./prisma-photo.mapper.js";
 import { Paginated } from "../@types/paginated.js";
 
 @injectable()
 export class PrismaPhotoRepository implements PhotoRepository {
+  async findByIdWithMetadata(photoId: string, sessionUser?: string): Promise<PhotoWithMetadata | null> {
+    const result = await Promise.all([
+      prisma.photo.findUnique({
+        where: { id: photoId },
+        include: {
+          user: true,
+          _count: {
+            select: { likes: true },
+          },
+        },
+      }),
+      sessionUser
+        ? prisma.like.findUnique({
+            where: { userId_photoId: {
+              userId: sessionUser,
+              photoId,
+            } },
+          }).then(like => !!like)
+        : Promise.resolve(false),
+    ])
+
+    if (!result[0]) {
+      return null;
+    }
+
+    return PrismaPhotoMapper.toPhotoWithMetadata({
+      ...result[0],
+      session: {
+        isLiked: result[1],
+      },
+    });
+  }
+
   async findById(id: string): Promise<Photo | null> {
     const result = await prisma.photo.findUnique({ where: { id } });
     return result && PrismaPhotoMapper.toPhoto(result);
