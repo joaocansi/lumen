@@ -16,6 +16,7 @@ import { container } from "tsyringe";
 import ServiceError from "./errors/ServiceError";
 import fs from "fs";
 import path from "path";
+import { AuthController } from "./controllers/AuthController";
 
 const app = new Hono<{
   Variables: {
@@ -28,13 +29,13 @@ const __dirname = import.meta.dirname;
 const uploadDir = path.resolve(__dirname, "../uploads");
 
 app.use(
-  "/api/auth/*",
+  "*",
   cors({
     origin: "http://localhost:3001",
     credentials: true,
     allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["POST", "GET", "OPTIONS"],
-  })
+    allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  }),
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
@@ -46,22 +47,26 @@ app.onError((err, c) => {
   return ServiceError.internalServerError(c);
 });
 
-app.get('/api/uploads/*', serveStatic({
-  root: uploadDir,
-  getContent: async path => {
-    console.log(path);
-    return await fs.promises.readFile(path);
-  },
-  rewriteRequestPath: path =>
-    path.replace(/^\/api\/uploads/, ''),
-}));
-
+app.get(
+  "/api/uploads/*",
+  serveStatic({
+    root: uploadDir,
+    getContent: async (path) => {
+      console.log(path);
+      return await fs.promises.readFile(path);
+    },
+    rewriteRequestPath: (path) => path.replace(/^\/api\/uploads/, ""),
+  }),
+);
 
 const profileController = container.resolve(ProfileController);
 app.route("/api/profile", profileController);
 
 const photoController = container.resolve(PhotoController);
 app.route("/api/photo", photoController);
+
+const authController = container.resolve(AuthController);
+app.route("/api/auth", authController);
 
 serve({ fetch: app.fetch, port: 3000 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`);
