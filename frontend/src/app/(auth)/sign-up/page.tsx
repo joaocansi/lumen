@@ -46,7 +46,7 @@ export default function SignUpPage() {
           <Button
             fullWidth
             as={Link}
-            color="success"
+            className="text-white bg-green-600 hover:bg-green-700"
             href="/sign-in"
             size="lg"
             variant="solid"

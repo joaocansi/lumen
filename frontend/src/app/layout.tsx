@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
 import clsx from "clsx";
+import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
 
@@ -47,6 +48,8 @@ export default function RootLayout({
           }}
         >
           {children}
+
+          <Toaster />
         </Providers>
       </body>
     </html>
