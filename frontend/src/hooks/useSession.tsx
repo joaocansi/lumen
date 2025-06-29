@@ -1,22 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext } from "react";
 
-import { authClient } from "@/config/auth";
+import { SessionProfile } from "@/types";
 
-export function useSession() {
-  const [session, setSession] = useState<Awaited<
-    ReturnType<typeof authClient.getSession>
-  > | null>(null);
+type SessionContextProps = {
+  sessionProfile: SessionProfile | null;
+  isAuthenticated: boolean;
+};
 
-  useEffect(() => {
-    const loadSession = async () => {
-      const session = await authClient.getSession();
-      setSession(session);
-    };
+const SessionContext = createContext({} as SessionContextProps);
 
-    loadSession();
-  }, []);
+type SessionProviderProps = {
+  children: React.ReactNode;
+  sessionProfile: SessionProfile | null;
+};
 
-  return { session };
-}
+export const SessionProvider = ({
+  sessionProfile,
+  children,
+}: SessionProviderProps) => {
+  return (
+    <SessionContext.Provider
+      value={{ sessionProfile, isAuthenticated: !!sessionProfile }}
+    >
+      {children}
+    </SessionContext.Provider>
+  );
+};
+
+export const useSession = () => useContext(SessionContext);
