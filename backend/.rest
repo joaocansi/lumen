@@ -28,10 +28,10 @@ POST http://localhost:3000/api/auth/sign-up/email
 Content-Type: application/json
 
 {
-  "email": "joaoa@gmail.com",
-  "password": "senhasegura123",
+  "email": "joaocansi@gmail.com",
+  "password": "joao1234",
   "name": "Joao Guilherme",
-  "username": "otaldocansi",
+  "username": "joaocansi",
   "bio": "só aceito góticas"
 }
 

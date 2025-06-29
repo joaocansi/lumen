@@ -31,23 +31,29 @@ export class ProfileService {
   ) {}
 
   async getProfileByUsername(
-    data: GetProfileByUsernameInput,
-  ): Promise<Profile & { followers: number; following: number }> {
+    data: GetProfileByUsernameInput & { currentUserId?: string },
+  ): Promise<
+    Profile & { followers: number; following: number; isFollowing: boolean }
+  > {
     const profile = await this.profileRepository.findByUsername(data.username);
     if (!profile)
       throw new ServiceError("Perfil não criado", ServiceErrorType.NotFound);
 
-    const followers = await prisma.follow.count({
-      where: { followingId: profile.id },
-    });
+    const [followers, following, isFollowing] = await Promise.all([
+      prisma.follow.count({ where: { followingId: profile.id } }),
+      prisma.follow.count({ where: { followerId: profile.id } }),
+      data.currentUserId
+        ? this.profileRepository.isFollowing(data.currentUserId, profile.id)
+        : false,
+    ]);
 
-    const following = await prisma.follow.count({
-      where: { followerId: profile.id },
-    });
-
-    return { ...profile, followers, following };
+    return {
+      ...profile,
+      followers,
+      following,
+      isFollowing,
+    };
   }
-  
   async updateProfile(data: UpdateProfileInput): Promise<UpdateProfileOutput> {
     const profile = await this.profileRepository.findById(data.userId);
     if (!profile)
@@ -124,5 +130,46 @@ export class ProfileService {
     }
 
     await this.profileRepository.follow(follower.id, following.id);
+  }
+
+  async unfollowProfile(data: FollowProfileInput): Promise<void> {
+    const { followerId, followingUsername } = data;
+
+    const follower = await this.profileRepository.findById(followerId);
+    if (!follower) {
+      throw new ServiceError(
+        "Perfil (seguidor) não existe",
+        ServiceErrorType.NotFound,
+      );
+    }
+
+    const following =
+      await this.profileRepository.findByUsername(followingUsername);
+    if (!following) {
+      throw new ServiceError(
+        "Perfil (seguido) não encontrado",
+        ServiceErrorType.NotFound,
+      );
+    }
+
+    if (follower.id === following.id) {
+      throw new ServiceError(
+        "Você não pode deixar de seguir a si mesmo",
+        ServiceErrorType.BadRequest,
+      );
+    }
+
+    const alreadyFollowing = await this.profileRepository.isFollowing(
+      follower.id,
+      following.id,
+    );
+    if (!alreadyFollowing) {
+      throw new ServiceError(
+        "Você não está seguindo este usuário",
+        ServiceErrorType.BadRequest,
+      );
+    }
+
+    await this.profileRepository.unfollow(follower.id, following.id);
   }
 }

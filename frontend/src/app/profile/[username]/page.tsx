@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { notFound } from "next/navigation";
 import { Divider } from "@heroui/divider";
 import { headers } from "next/headers";
@@ -25,6 +26,54 @@ async function getProfile(
   } catch {
     return null;
   }
+=======
+import { notFound, redirect } from "next/navigation";
+
+import { ProfileHeader } from "@/components/profileHeader";
+import { authClient } from "@/config/auth";
+
+type Profile = {
+  id: string;
+  username: string;
+  name?: string;
+  bio?: string;
+  avatarUrl?: string;
+  followers: number;
+  following: number;
+  photos: [];
+  isFollowing: boolean;
+};
+
+async function getProfile(username: string, token?: string): Promise<Profile> {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/profile/username/${username}`,
+    {
+      headers,
+      credentials: "include",
+      cache: "no-store",
+    },
+  );
+
+  if (res.status === 401) {
+    redirect("/auth/signin");
+  }
+
+  if (res.status === 404) {
+    notFound();
+  }
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to fetch profile");
+  }
+
+  return res.json();
+>>>>>>> main
 }
 
 export default async function ProfilePage({
@@ -32,6 +81,7 @@ export default async function ProfilePage({
 }: {
   params: Promise<{ username: string }>;
 }) {
+<<<<<<< HEAD
   const { username } = await params;
   const profile = await getProfile(username);
 
@@ -49,4 +99,24 @@ export default async function ProfilePage({
       </main>
     </ProfilePageProvider>
   );
+=======
+  try {
+    const session = await authClient.getSession();
+    if (!session) {
+      redirect("/auth/signin");
+    }
+
+    const { username } = await params;
+    const profile = await getProfile(username);
+
+    return (
+      <main className="max-w-5xl mx-auto px-4 py-10">
+        <ProfileHeader profile={profile} />
+      </main>
+    );
+  } catch (error) {
+    console.error("Profile page error:", error);
+    notFound();
+  }
+>>>>>>> main
 }
