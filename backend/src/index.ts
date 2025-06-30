@@ -16,7 +16,8 @@ import { container } from "tsyringe";
 import ServiceError from "./errors/ServiceError";
 import fs from "fs";
 import path from "path";
-import { AuthController } from "./controllers/AuthController";
+import { AuthController } from "./controllers/auth.controller";
+import { prisma } from "./database/prisma/prisma-client";
 
 const app = new Hono<{
   Variables: {
@@ -44,6 +45,7 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
 
 app.onError((err, c) => {
   if (err instanceof ServiceError) return err.toApiError(c);
+  console.log(err)
   return ServiceError.internalServerError(c);
 });
 
@@ -67,6 +69,18 @@ app.route("/api/photo", photoController);
 
 const authController = container.resolve(AuthController);
 app.route("/api/auth", authController);
+
+app.post('/reset', async (c) => {
+  await prisma.photo.deleteMany({})
+  await prisma.account.deleteMany({})
+  await prisma.comment.deleteMany({})
+  await prisma.follow.deleteMany({})
+  await prisma.like.deleteMany({})
+  await prisma.session.deleteMany({})
+  await prisma.verification.deleteMany({})
+  await prisma.user.deleteMany({})
+  return c.json({});
+})
 
 serve({ fetch: app.fetch, port: 3000 }, (info) => {
   console.log(`Server is running on http://localhost:${info.port}`);

@@ -12,7 +12,7 @@ import { PrismaPhotoRepository } from "../repositories/prisma-photo.repository";
 
 import { LikeRepository } from "../domain/like/like.repository";
 import { PrismaLikeRepository } from "../repositories/prisma-like.repository";
-import { AuthController } from "../controllers/AuthController";
+import { AuthController } from "../controllers/auth.controller";
 
 container.registerSingleton<FileUploaderProvider>(
   "FileUploaderProvider",

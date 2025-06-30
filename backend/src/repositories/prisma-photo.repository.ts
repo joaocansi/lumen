@@ -85,7 +85,7 @@ export class PrismaPhotoRepository implements PhotoRepository {
           userId
         },
       }),
-      prisma.photo.count({ where: { userId } }),
+      prisma.photo.count({ where: { userId } })
     ]);
 
     return {

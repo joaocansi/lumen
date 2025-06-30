@@ -2,13 +2,13 @@ export interface Profile {
   id: string;
   username: string;
   name: string;
-  bio?: string;
+  email: string;
+  bio?: string | null;
+  avatarUrl?: string | null;
 }
 
-export interface ProfileWithFollowInfo {
-  username: string;
-  name: string;
-  bio?: string;
+export type ProfileWithFollowInfo = Profile & {
   followersCount: number;
   followingCount: number;
+  photosCount: number;
 }

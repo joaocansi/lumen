@@ -43,11 +43,10 @@ export class ProfileController extends Hono {
   async getProfileByUsername(c: HonoContext) {
     const username = c.req.param("username");
     const user = c.get("user");
-    console.log("Usuário logado é:", user);
 
     const profile = await this.profileService.getProfileByUsername({
       username,
-      currentUserId: user?.id,
+      sessionUserId: user?.id,
     });
     return c.json(profile);
   }

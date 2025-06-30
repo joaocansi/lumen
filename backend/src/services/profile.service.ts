@@ -1,14 +1,19 @@
 import { inject, injectable } from "tsyringe";
 import type { ProfileRepository } from "../domain/profile/profile.repository";
-import { Profile } from "../domain/profile/profile";
+import { Profile, ProfileWithFollowInfo } from "../domain/profile/profile";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
-import { prisma } from "../database/prisma/prisma-client";
 
 type GetProfileByUsernameInput = {
   username: string;
+  sessionUserId?: string;
 };
 
-type GetProfileUsernameOutput = Profile;
+type GetProfileUsernameOutput = ProfileWithFollowInfo & {
+  _session: { 
+    isFollowing: boolean, 
+    isOwnProfile: boolean 
+  }
+};
 
 type UpdateProfileInput = {
   userId: string;
@@ -30,34 +35,28 @@ export class ProfileService {
     private profileRepository: ProfileRepository,
   ) {}
 
-  async getProfileByUsername(
-    data: GetProfileByUsernameInput & { currentUserId?: string },
-  ): Promise<
-    Profile & { followers: number; following: number; isFollowing: boolean }
-  > {
+  async getProfileByUsername(data: GetProfileByUsernameInput): Promise<GetProfileUsernameOutput> {
     const profile = await this.profileRepository.findByUsername(data.username);
-    if (!profile)
-      throw new ServiceError("Perfil não criado", ServiceErrorType.NotFound);
+    if (!profile) {
+      throw new ServiceError("Perfil não existe", ServiceErrorType.NotFound);
+    }
 
-    const [followers, following, isFollowing] = await Promise.all([
-      prisma.follow.count({ where: { followingId: profile.id } }),
-      prisma.follow.count({ where: { followerId: profile.id } }),
-      data.currentUserId
-        ? this.profileRepository.isFollowing(data.currentUserId, profile.id)
-        : false,
-    ]);
+    let isFollowing = false;
+    let isOwnProfile = false;
 
-    return {
-      ...profile,
-      followers,
-      following,
-      isFollowing,
-    };
+    if (data.sessionUserId) {
+      isFollowing = await this.profileRepository.isFollowing(data.sessionUserId, profile.id);
+      isOwnProfile = data.sessionUserId === profile.id;
+    }
+
+    return Object.assign(profile, { _session: { isFollowing, isOwnProfile } })
   }
+
   async updateProfile(data: UpdateProfileInput): Promise<UpdateProfileOutput> {
     const profile = await this.profileRepository.findById(data.userId);
     if (!profile)
       throw new ServiceError("Perfil não existe", ServiceErrorType.NotFound);
+    
     const { userId, ...updateData } = data;
     const updatedProfile = await this.profileRepository.update(userId, {
       ...updateData,

@@ -2,9 +2,11 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "../database/prisma/prisma-client";
 import { z } from "zod";
+import { bearer } from "better-auth/plugins";
 
 export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3001"],
+  plugins: [bearer()],
   database: prismaAdapter(prisma, {
     provider: "mysql",
   }),
@@ -14,11 +16,13 @@ export const auth = betterAuth({
         type: "string",
         required: false,
         fieldName: "bio",
+        returned: true,
       },
       username: {
         required: true,
         type: "string",
         unique: true,
+        returned: true,
         validator: {
           input: z
             .string()

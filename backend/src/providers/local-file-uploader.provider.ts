@@ -1,6 +1,7 @@
 import { FileUploaderProvider } from "../domain/file-uploader-provider";
 import { injectable } from "tsyringe";
 import { randomUUID } from "crypto";
+import sharp from 'sharp';
 
 import fs from "fs";
 import path from "path";
@@ -18,12 +19,18 @@ export class LocalFileUploaderProvider implements FileUploaderProvider {
   }
 
   async upload(file: File): Promise<string> {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const fileExtension = path.extname(file.name);
-    const fileName = `${randomUUID()}${fileExtension}`;
-    const filePath = path.join(this.uploadDir, fileName);
+      const buffer = Buffer.from(await file.arrayBuffer());
 
-    await fs.promises.writeFile(filePath, buffer);
-    return `/uploads/${fileName}`;
+      const processedBuffer = await sharp(buffer)
+        .resize(1024)
+        .sharpen(2)
+        .toBuffer();
+
+      const fileExtension = path.extname(file.name) || '.jpg'; // fallback para jpg
+      const fileName = `${randomUUID()}${fileExtension}`;
+      const filePath = path.join(this.uploadDir, fileName);
+
+      await fs.promises.writeFile(filePath, buffer);
+      return `/uploads/${fileName}`;
   }
 }

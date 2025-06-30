@@ -26,6 +26,7 @@ export class PhotoController extends Hono {
     private photoService: PhotoService
   ) {
     super();
+
     this.post("/", mustBeAuthenticated, this.newPhoto.bind(this));
     this.get("/user/:username", this.getPhotosByProfile.bind(this));
     this.get('/:photoId', isAuthenticated, this.getPhotoById.bind(this));
@@ -34,6 +35,7 @@ export class PhotoController extends Hono {
   }
 
   async getPhotoById(c: HonoContext) {
+    console.log('fasdf')
     const photoId = c.req.param('photoId');
     const user = c.get("user")
 

@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { prisma } from "../database/prisma/prisma-client.js";
 import type { ProfileRepository } from "../domain/profile/profile.repository.js";
-import { Profile } from "../domain/profile/profile.js";
+import { Profile, ProfileWithFollowInfo } from "../domain/profile/profile.js";
 import { PrismaProfileMapper } from "./prisma-profile.mapper.js";
 
 @injectable()
@@ -11,9 +11,16 @@ export class PrismaProfileRepository implements ProfileRepository {
     return result && PrismaProfileMapper.toProfile(result);
   }
 
-  async findByUsername(username: string): Promise<Profile | null> {
-    const result = await prisma.user.findUnique({ where: { username } });
-    return result && PrismaProfileMapper.toProfile(result);
+  async findByUsername(username: string): Promise<ProfileWithFollowInfo | null> {
+    const result = await prisma.user.findUnique({ 
+      where: { username },
+      include: {
+        _count: {
+          select: { followers: true, following: true, photos: true },
+        },
+      },
+    });
+    return result && PrismaProfileMapper.toProfileWithFollowInfo(result);
   }
 
   async update(
