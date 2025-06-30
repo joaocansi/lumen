@@ -1,0 +1,17 @@
+{
+  "name": "artillery",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node faker.js",
+    "seed:images": "node utils/seed.js",
+    "gen:images": "node utils/images.js"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "axios": "^1.10.0",
+    "dotenv": "^17.0.0",
+    "mysql2": "^3.14.1"
+  }
+}
