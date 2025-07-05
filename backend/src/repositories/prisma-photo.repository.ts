@@ -14,7 +14,7 @@ export class PrismaPhotoRepository implements PhotoRepository {
         include: {
           user: true,
           _count: {
-            select: { likes: true },
+            select: { likes: true, comments: true },
           },
         },
       }),
@@ -41,17 +41,49 @@ export class PrismaPhotoRepository implements PhotoRepository {
   }
 
   async findById(id: string): Promise<Photo | null> {
-    const result = await prisma.photo.findUnique({ where: { id } });
+    const result = await prisma.photo.findUnique({ 
+      where: { id }, 
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        } 
+      } 
+    });
+    result
     return result && PrismaPhotoMapper.toPhoto(result);
   }
 
   async create(data: CreatePhotoData): Promise<Photo> {
-    const result = await prisma.photo.create({ data });
+    const result = await prisma.photo.create({ 
+      data,
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        } 
+      }
+    });
     return result && PrismaPhotoMapper.toPhoto(result);
   }
 
   async update(id: string, data: UpdatePhotoData): Promise<Photo> {
-    const result = await prisma.photo.update({ where: { id }, data });
+    const result = await prisma.photo.update({ 
+      where: { id }, 
+      data, 
+      include: {
+        _count: {
+          select: {
+            comments: true,
+            likes: true
+          }
+        } 
+      } 
+    });
     return result && PrismaPhotoMapper.toPhoto(result);
   }
 
@@ -63,6 +95,12 @@ export class PrismaPhotoRepository implements PhotoRepository {
         take: limit,
         include: {
           user: true,
+          _count: {
+            select: {
+              comments: true,
+              likes: true
+            }
+          }
         }
       }),
       prisma.photo.count(),
@@ -84,6 +122,14 @@ export class PrismaPhotoRepository implements PhotoRepository {
         where: {
           userId
         },
+        include: {
+          _count: {
+            select: {
+              comments: true,
+              likes: true
+            }
+          }
+        }
       }),
       prisma.photo.count({ where: { userId } })
     ]);

@@ -1,7 +1,7 @@
 import { Paginated } from "../../@types/paginated";
-import { Photo, PhotoWithMetadata } from "./photo";
+import { Photo, PhotoWithMetadata, RawPhoto } from "./photo";
 
-export type CreatePhotoData = Omit<Photo, "id" | "createdAt" | "updatedAt" | "uploadedAt"> & { userId: string };
+export type CreatePhotoData = Omit<RawPhoto, "id" | "createdAt" | "updatedAt" | "uploadedAt"> & { userId: string };
 export type UpdatePhotoData = Partial<Omit<Photo, 'userId'>>;
 
 export interface PhotoRepository {

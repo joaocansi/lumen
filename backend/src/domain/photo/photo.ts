@@ -1,9 +1,17 @@
-export class Photo {
+export class RawPhoto {
   id: string;
   caption: string;
-  url: string;
+  path: string;
+  width: number;
+  height: number;
   uploadedAt: Date;
 }
+
+
+export type Photo = RawPhoto & {
+  likesCount: number;
+  commentsCount: number;
+} 
 
 export type PhotoWithUser = Photo & {
   user: {

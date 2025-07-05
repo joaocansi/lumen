@@ -47,11 +47,11 @@ export class PhotoService {
     const profile = await this.profileRepository.findById(data.userId);
     if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);
 
-    const uploadedFileHash = await this.fileUploader.upload(data.image);
+    const uploadedFile = await this.fileUploader.upload(data.image);
     const photo = await this.photoRepository.create({
       caption: data.caption,
       userId: profile.id,
-      url: uploadedFileHash,
+      ...uploadedFile,
     });
 
     return photo
