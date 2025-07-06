@@ -1,5 +1,7 @@
 "use server";
 
+import { cookies } from "next/headers";
+
 import { api } from "@/config/axios";
 import { ActionResponse, Paginated, Photo } from "@/types";
 
@@ -13,12 +15,17 @@ export async function getProfileImages(
   try {
     const response = await api.get(
       `/photo/user/${username}?limit=${limit}&offset=${offset}`,
+      {
+        headers: {
+          Cookie: (await cookies()).toString(),
+        },
+      },
     );
     return { response: response.data };
   } catch (error) {
     return {
       error: {
-        details: error,
+        details: "Não foi possível realizar a solicitação",
       },
     };
   }

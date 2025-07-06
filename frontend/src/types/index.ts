@@ -5,11 +5,14 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 };
 
 export interface Comment {
-  id: number;
-  username: string;
-  text: string;
-  timestamp: string;
-  avatarUrl: string;
+  id: string;
+  createdAt: Date;
+  content: string;
+  profile: {
+    avatarUrl: string;
+    name: string;
+    username: string;
+  };
 }
 
 export interface Profile {
@@ -30,6 +33,7 @@ export interface Photo {
   updatedAt: Date;
   likesCount: number;
   commentsCount: number;
+  isLiked: boolean;
 }
 
 export type ProfileWithMetadata = Profile & {

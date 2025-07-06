@@ -1,4 +1,4 @@
-import { Photo as PhotoEntity, User } from "@prisma/client"
+import { Like, Photo as PhotoEntity, User } from "@prisma/client"
 import { Photo, PhotoWithMetadata, PhotoWithUser } from "../domain/photo/photo"
 
 type PhotoWithMetadataMapper = PhotoEntity & {
@@ -36,7 +36,7 @@ export class PrismaPhotoMapper {
         }
     }
     
-    static toPhoto(photo: PhotoEntity & { _count: { likes: number, comments: number } }): Photo {
+    static toPhoto(photo: PhotoEntity & { _count: { likes: number, comments: number }, likes?: any[] }): Photo {
         return {
             id: photo.id,
             caption: photo.caption,
@@ -45,7 +45,8 @@ export class PrismaPhotoMapper {
             width: photo.width,
             height: photo.height,
             commentsCount: photo._count.comments,
-            likesCount: photo._count.likes
+            likesCount: photo._count.likes,
+            isLiked: !!photo.likes && photo.likes.length > 0,
         }
     }
     
@@ -63,7 +64,8 @@ export class PrismaPhotoMapper {
                 username: photo.user.username,
             },
             commentsCount: photo._count.comments,
-            likesCount: photo._count.likes
+            likesCount: photo._count.likes,
+            isLiked: false,
         }
     }
 }

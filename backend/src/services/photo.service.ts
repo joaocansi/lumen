@@ -7,6 +7,7 @@ import { ProfileRepository } from "../domain/profile/profile.repository";
 import ServiceError, { ServiceErrorType } from "../errors/ServiceError";
 import { Paginated } from "../@types/paginated";
 import { LikeRepository } from "../domain/like/like.repository";
+import { CommentRepository } from "../domain/comment/comment.repository";
 
 type NewPhotoInput = {
   image: File;
@@ -16,10 +17,13 @@ type NewPhotoInput = {
 
 type NewPhotoOutput = Photo;
 
-type GetPhotosByProfileInput = {
+export type GetPhotosByProfileInput = {
   limit: number;
   offset: number;
   username: string;
+  user: {
+    id: string;
+  } | null;
 }
 
 type GetPhotosByProfileOutput = Paginated<Photo[]>
@@ -33,6 +37,8 @@ export class PhotoService {
     private likeRepository: LikeRepository,
     @inject("ProfileRepository")
     private profileRepository: ProfileRepository,
+    @inject("CommentRepository")
+    private commentRepository: CommentRepository,
     @inject("FileUploaderProvider")
     private fileUploader: FileUploaderProvider
   ) {}
@@ -61,7 +67,7 @@ export class PhotoService {
     const profile = await this.profileRepository.findByUsername(data.username);
     if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);      
 
-    const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset);
+    const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset, data.user?.id);
     return photos;
   }
 
@@ -77,5 +83,10 @@ export class PhotoService {
     if (isLiked)
       throw new ServiceError("Foto já curtida", ServiceErrorType.AlreadyExists);
     return this.likeRepository.likePhoto(photoId, id)
+  }
+
+  async getPhotoComments(photoId: string) {
+    const comments = await this.commentRepository.findCommentsByPhotoId(photoId);
+    return comments;
   }
 }

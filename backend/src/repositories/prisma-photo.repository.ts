@@ -113,7 +113,7 @@ export class PrismaPhotoRepository implements PhotoRepository {
     };
   }
 
-  async getByUserId(userId: string, limit: number, offset: number): Promise<Paginated<Photo[]>> {
+  async getByUserId(userId: string, limit: number, offset: number, sessionUser?: string): Promise<Paginated<Photo[]>> {
     const [photos, total] = await Promise.all([
       prisma.photo.findMany({
         orderBy: { createdAt: "desc" },
@@ -128,10 +128,15 @@ export class PrismaPhotoRepository implements PhotoRepository {
               comments: true,
               likes: true
             }
+          },
+          likes: {
+            where: {
+              userId: sessionUser
+            }
           }
-        }
+        },
       }),
-      prisma.photo.count({ where: { userId } })
+      prisma.photo.count({ where: { userId } }),
     ]);
 
     return {

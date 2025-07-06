@@ -8,13 +8,20 @@ import { Divider } from "@heroui/divider";
 import { Textarea } from "@heroui/input";
 import { Button } from "@heroui/button";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { CircularProgress } from "@heroui/progress";
+import toast from "react-hot-toast";
+import Link from "next/link";
 
 import { useProfilePage } from "@/hooks/useProfilePage";
+import { Comment } from "@/types";
+import { getCommentsByPhotoId } from "@/actions/get-comments-by-photo-id";
+import { likePhoto } from "@/actions/like-photo";
+import { unlikePhoto } from "@/actions/unlike-photo";
 
 export function ProfilePhotoView() {
   const { profile, paginatedPhotos, openedPhotoIndex, setOpenedPhotoIndex } =
     useProfilePage();
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<Comment[] | null>(null);
 
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
@@ -24,22 +31,20 @@ export function ProfilePhotoView() {
     const result = paginatedPhotos.data[openedPhotoIndex];
     if (!result) return null;
 
-    const aspectRatio = Math.min(
-      1.91,
-      Math.max(result.width / result.height, 0.8),
-    );
+    setLiked(result.isLiked);
+    setLikes(result.likesCount);
 
-    return {
-      ...result,
-      aspectRatio,
-    };
+    return result;
   }, [openedPhotoIndex]);
 
   useEffect(() => {
     if (openedPhotoIndex !== -1) {
       document.body.style.overflow = "hidden";
+      getComments();
+
       return () => {
         document.body.style.overflow = "";
+        setComments(null);
       };
     }
   }, [openedPhotoIndex]);
@@ -49,8 +54,43 @@ export function ProfilePhotoView() {
   };
 
   const toggleLike = async () => {
-    setLiked((prev) => !prev);
-    setLikes((prev) => (liked ? prev - 1 : prev + 1));
+    if (!openedPhoto) return;
+
+    if (!liked) {
+      const { error } = await likePhoto(openedPhoto.id);
+      if (error) {
+        toast.error("Não foi possível dar like na foto");
+        return;
+      }
+
+      setLiked(true);
+      setLikes((prev) => prev + 1);
+
+      return;
+    }
+
+    const { error } = await unlikePhoto(openedPhoto.id);
+    if (error) {
+      toast.error("Não foi possível tirar like da foto");
+      return;
+    }
+
+    setLiked(false);
+    setLikes((prev) => Math.max(0, prev - 1));
+    return;
+  };
+
+  const getComments = async () => {
+    if (!openedPhoto) return;
+
+    const { response, error } = await getCommentsByPhotoId(openedPhoto.id);
+    if (error || !response) {
+      toast.error("Não foi possível retornar os comentários.");
+      setComments([]);
+      return;
+    }
+
+    setComments(response);
   };
 
   return (
@@ -85,28 +125,31 @@ export function ProfilePhotoView() {
 
               <div className="flex flex-1 justify-between flex-col max-lg:hidden">
                 <div className="flex flex-col gap-2 overflow-y-auto pr-2 mt-2">
-                  {/* {comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-2 items-start">
-                      <Avatar
-                        className="flex-shrink-0"
-                        size="sm"
-                        src={comment.avatarUrl}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium text-sm">
-                            {comment.username}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {comment.timestamp}
-                          </span>
+                  {comments ? (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-2 items-start">
+                        <Avatar
+                          className="flex-shrink-0"
+                          size="sm"
+                          src={comment.profile.avatarUrl}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <Link href={`/profile/${comment.profile.username}`}>
+                            <span className="font-medium text-sm">
+                              {comment.profile.username}
+                            </span>
+                          </Link>
+                          <p className="text-sm break-words">
+                            {comment.content}
+                          </p>
                         </div>
-                        <p className="text-sm mt-1 break-words">
-                          {comment.text}
-                        </p>
                       </div>
+                    ))
+                  ) : (
+                    <div className="h-full overflow-hidden w-full flex justify-center mt-4">
+                      <CircularProgress size="sm" />
                     </div>
-                  ))} */}
+                  )}
                 </div>
                 <Divider className="mb-4" />
               </div>

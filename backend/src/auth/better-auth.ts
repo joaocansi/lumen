@@ -6,7 +6,7 @@ import { bearer } from "better-auth/plugins";
 
 export const auth = betterAuth({
   trustedOrigins: ["http://localhost:3001"],
-  plugins: [bearer()],
+  // plugins: [bearer()],
   database: prismaAdapter(prisma, {
     provider: "mysql",
   }),

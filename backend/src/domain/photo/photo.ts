@@ -11,6 +11,7 @@ export class RawPhoto {
 export type Photo = RawPhoto & {
   likesCount: number;
   commentsCount: number;
+  isLiked: boolean;
 } 
 
 export type PhotoWithUser = Photo & {

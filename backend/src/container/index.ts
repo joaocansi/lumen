@@ -13,6 +13,9 @@ import { PrismaPhotoRepository } from "../repositories/prisma-photo.repository";
 import { LikeRepository } from "../domain/like/like.repository";
 import { PrismaLikeRepository } from "../repositories/prisma-like.repository";
 import { AuthController } from "../controllers/auth.controller";
+import { CommentRepository } from "../domain/comment/comment.repository";
+import { PrismaCommentRepository } from "../repositories/prisma-comment.repository";
+import { CommentService } from "../services/comment.service";
 
 container.registerSingleton<FileUploaderProvider>(
   "FileUploaderProvider",
@@ -35,6 +38,15 @@ container.registerSingleton<LikeRepository>(
   PrismaLikeRepository,
 );
 
+container.registerSingleton<CommentRepository>(
+  "CommentRepository",
+  PrismaCommentRepository,
+);
+container.registerSingleton<CommentService>(
+  "CommentService",
+  CommentService,
+);
+
 container.registerSingleton<PhotoRepository>(
   "PhotoRepository",
   PrismaPhotoRepository,
@@ -44,3 +56,4 @@ container.registerSingleton<PhotoController>(
   "PhotoController",
   PhotoController,
 );
+
