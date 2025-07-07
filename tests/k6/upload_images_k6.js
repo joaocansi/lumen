@@ -20,8 +20,8 @@ const url = 'http://localhost:3000';
 
 export function setup() {
     const data = http.post('http://localhost:3000/api/auth/sign-in/email', {
-        password: 'mariaSecure2025!',
-        email: 'maria.lima@example.com'
+        password: 'arthur1234',
+        email: 'mamaefalei@gmail.com'
     });
     const token = data.headers['Set-Auth-Token'];
     return { token }

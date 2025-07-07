@@ -27,7 +27,7 @@ export function setup() {
     return { token }
 }
 export default function (data) {
-    http.asyncRequest('GET', url + '/api/photo/user/mamaefalei', {
+    http.asyncRequest('GET', url + '/api/photo/user/mamaefalei?limit=15&offset=0', {
         headers: {
             'Authorization': `Bearer ${data.token}`,
         }

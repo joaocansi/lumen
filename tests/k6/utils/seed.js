@@ -30,17 +30,17 @@ async function seedPhotos(batchSize = 500) {
             const batch = photosData.slice(i, i + batchSize);
 
             const values = [];
-            const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?)').join(', ');
+            const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
 
             const data = new Date();
             const [rows] = await connection.execute('SELECT MAX(id) AS maxId FROM photo');
             let lastId = rows[0].maxId || 0;
             batch.forEach(({ url, caption }, index) => {
-                values.push(lastId + index + 1, userId, url, caption, data, data);
+                values.push(lastId + index + 1, userId, url, caption, 0, 0, data, data);
             });
 
 
-            const query = `INSERT INTO photo (id, userId, url, caption, updatedAt, createdAt) VALUES ${placeholders}`;
+            const query = `INSERT INTO photo (id, userId, path, caption, width, height, updatedAt, createdAt) VALUES ${placeholders}`;
             await connection.execute(query, values);
             console.log(`Inseridos ${batch.length} fotos (batch ${i / batchSize + 1})`);
         }
