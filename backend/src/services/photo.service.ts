@@ -28,6 +28,9 @@ export type GetPhotosByProfileInput = {
 
 type GetPhotosByProfileOutput = Paginated<Photo[]>
 
+type GetPhotosInput = { limit: number; offset: number; user: { id: string } | null };
+type GetPhotosOutput = Paginated<Photo[]>;
+
 @injectable()
 export class PhotoService {
   constructor(
@@ -68,6 +71,11 @@ export class PhotoService {
     if (!profile) throw new ServiceError("perfil não existe", ServiceErrorType.NotFound);      
 
     const photos = await this.photoRepository.getByUserId(profile.id, data.limit, data.offset, data.user?.id);
+    return photos;
+  }
+
+  async getPhotos(data: GetPhotosInput): Promise<GetPhotosOutput> {
+    const photos = await this.photoRepository.get(data.limit, data.offset, data.user?.id);
     return photos;
   }
 

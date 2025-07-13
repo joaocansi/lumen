@@ -1,5 +1,16 @@
 import { User as UserEntity } from "@prisma/client"
-import { Profile, ProfileWithFollowInfo } from "../domain/profile/profile"
+import { FollowSuggestion, Profile, ProfileWithFollowInfo } from "../domain/profile/profile"
+
+export type FollowSuggestionEntity = {
+  id: string;
+  username: string;
+  name: string;
+  image: string | null;
+  followersCount: number;
+  mutualFriendUsernames: string[];
+  score: number;
+};
+
 
 export class PrismaProfileMapper {
     static toProfile(profile: UserEntity): Profile {
@@ -24,6 +35,15 @@ export class PrismaProfileMapper {
             photosCount: profile._count.photos,
             followersCount: profile._count.followers,
             followingCount: profile._count.following,
+        }
+    }
+
+    static toFollowSuggestion(followersSuggestion: FollowSuggestionEntity): FollowSuggestion {
+        return {
+            image: followersSuggestion.image,
+            mutualFriendUsernames: followersSuggestion.mutualFriendUsernames,
+            name: followersSuggestion.name,
+            username: followersSuggestion.username
         }
     }
 }

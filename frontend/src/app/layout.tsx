@@ -4,18 +4,20 @@ import clsx from "clsx";
 import { Toaster } from "react-hot-toast";
 
 import { Providers } from "./providers";
+import { getSession } from "./profile/layout";
 
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
+import { SessionProvider } from "@/hooks/useSession";
 
 export const metadata: Metadata = {
   title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    default: "Lumen - Compartilhe sua luz com o mundo!",
+    template: "%s - Lumen",
   },
   description: siteConfig.description,
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
 };
 
@@ -26,11 +28,13 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+
   return (
     <html suppressHydrationWarning lang="en">
       <head />
@@ -47,8 +51,7 @@ export default function RootLayout({
             // forcedTheme: "light",
           }}
         >
-          {children}
-
+          <SessionProvider sessionProfile={session}>{children}</SessionProvider>
           <Toaster />
         </Providers>
       </body>

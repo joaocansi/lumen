@@ -1,4 +1,4 @@
-import { Profile, ProfileWithFollowInfo } from "./profile";
+import { FollowSuggestion, Profile, ProfileWithFollowInfo } from "./profile";
 
 type UpdateProfileData = Partial<Omit<Profile, 'id'>>;
 
@@ -14,4 +14,6 @@ export interface ProfileRepository {
 
   getFollowers(username: string): Promise<Profile[]>;
   getFollowing(username: string): Promise<Profile[]>;
+
+  getTopKFollowSuggestion(userId: string, k: number): Promise<FollowSuggestion[]>;
 }

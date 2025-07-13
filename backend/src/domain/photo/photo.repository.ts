@@ -9,6 +9,6 @@ export interface PhotoRepository {
   findById(id: string): Promise<Photo | null>;
   create(photo: CreatePhotoData): Promise<Photo>;
   update(id: string, data: UpdatePhotoData): Promise<Photo>;
-  get(limit: number, offset: number): Promise<Paginated<Photo[]>>;
+  get(limit: number, offset: number, sessionUser?: string): Promise<Paginated<Photo[]>>;
   getByUserId(userId: string, limit: number, offset: number, sessionUser?: string): Promise<Paginated<Photo[]>>;
 }

@@ -2,18 +2,15 @@ import { FaComment, FaHeart } from "react-icons/fa";
 import { Image } from "@heroui/image";
 
 import { Photo } from "@/types";
-import { useProfilePage } from "@/hooks/useProfilePage";
 
 type ProfilePhotoProps = {
   photo: Photo;
-  photoPos: number;
+  onClick: (photoId: string) => void;
 };
 
-export function ProfilePhoto({ photo, photoPos }: ProfilePhotoProps) {
-  const { setOpenedPhotoIndex } = useProfilePage();
-
+export function ProfilePhoto({ photo, onClick }: ProfilePhotoProps) {
   const handlePhotoClick = () => {
-    setOpenedPhotoIndex(photoPos);
+    onClick(photo.id);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -25,7 +22,7 @@ export function ProfilePhoto({ photo, photoPos }: ProfilePhotoProps) {
 
   return (
     <div
-      aria-label={`View photo ${photoPos + 1} with ${photo.likesCount} likes and ${photo.commentsCount} comments`}
+      aria-label={`View photo with ${photo.likesCount} likes and ${photo.commentsCount} comments`}
       className="relative w-full h-full col-span aspect-[9/10] cursor-pointer"
       role="button"
       tabIndex={0}
@@ -33,7 +30,7 @@ export function ProfilePhoto({ photo, photoPos }: ProfilePhotoProps) {
       onKeyDown={handleKeyDown}
     >
       <Image
-        alt={`Photo ${photoPos + 1}`}
+        alt={`Photo`}
         classNames={{
           img: "w-full h-full object-cover",
           wrapper: "w-full h-full aspect-[9/10]",

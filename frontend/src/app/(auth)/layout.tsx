@@ -1,7 +1,7 @@
 import Image from "next/image";
 
-import "@/styles/auth.css";
 import { ThemeSwitch } from "@/components/theme-switch";
+import Link from "next/link";
 
 export default function AuthLayout({
   children,
@@ -13,14 +13,16 @@ export default function AuthLayout({
       <div className="w-full col-span-1 h-full flex flex-col items-center justify-between">
         <div className="flex justify-between w-full px-4 pt-2">
           <h1 className="flex text-2xl font-black gap-2">
-            <Image
-              alt="lumen"
-              className="dark:brightness-0 dark:invert"
-              height={32}
-              src="/logo.png"
-              width={32}
-            />
-            Lumen
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                alt="lumen"
+                className="dark:brightness-0 dark:invert"
+                height={32}
+                src="/logo.png"
+                width={32}
+              />
+              Lumen
+            </Link>
           </h1>
           <ThemeSwitch />
         </div>

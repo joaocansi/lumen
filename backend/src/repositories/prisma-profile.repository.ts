@@ -1,7 +1,7 @@
 import { injectable } from "tsyringe";
 import { prisma } from "../database/prisma/prisma-client.js";
 import type { ProfileRepository } from "../domain/profile/profile.repository.js";
-import { Profile, ProfileWithFollowInfo } from "../domain/profile/profile.js";
+import { FollowSuggestion, Profile, ProfileWithFollowInfo } from "../domain/profile/profile.js";
 import { PrismaProfileMapper } from "./prisma-profile.mapper.js";
 
 @injectable()
@@ -79,5 +79,55 @@ export class PrismaProfileRepository implements ProfileRepository {
     });
 
     return following.map((f) => PrismaProfileMapper.toProfile(f.following));
+  }
+
+  async getTopKFollowSuggestion(userId: string, k: number): Promise<FollowSuggestion[]> {
+    const myFollowing = await prisma.follow.findMany({
+      where: { followerId: userId },
+      select: { followingId: true },
+    });
+    const myFollowingIds = myFollowing.map(f => f.followingId);
+    const excludedIds = [...myFollowingIds, userId];
+
+    const candidates = await prisma.user.findMany({
+      where: {
+        id: { notIn: excludedIds },
+      },
+      select: {
+        id: true,
+        username: true,
+        name: true,
+        image: true,
+        followers: {
+          select: {
+            follower: {
+              select: {
+                id: true,
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const scored = candidates.map(user => {
+      const followers = user.followers.map(f => f.follower);
+      const mutualFriends = followers.filter(f => myFollowingIds.includes(f.id));
+      const score = followers.length + (mutualFriends.length > 0 ? 10 : 0);
+
+      return {
+        id: user.id,
+        username: user.username,
+        name: user.name,
+        image: user.image,
+        followersCount: followers.length,
+        mutualFriendUsernames: mutualFriends.map(f => f.username),
+        score,
+      };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, k).map(PrismaProfileMapper.toFollowSuggestion);
   }
 }

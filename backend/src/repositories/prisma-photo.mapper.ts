@@ -50,7 +50,7 @@ export class PrismaPhotoMapper {
         }
     }
     
-    static toPhotoWithUser(photo: PhotoEntity & { user: User, _count: { likes: number, comments: number } }): PhotoWithUser {
+    static toPhotoWithUser(photo: PhotoEntity & { user: User, _count: { likes: number, comments: number }, likes?: any[] }): PhotoWithUser {
         return {
             id: photo.id,
             caption: photo.caption,
@@ -65,7 +65,7 @@ export class PrismaPhotoMapper {
             },
             commentsCount: photo._count.comments,
             likesCount: photo._count.likes,
-            isLiked: false,
+            isLiked: !!photo.likes && photo.likes.length > 0,
         }
     }
 }

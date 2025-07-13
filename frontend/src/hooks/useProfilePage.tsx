@@ -1,27 +1,23 @@
 "use client";
 
-import {
-  createContext,
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import { createContext, Dispatch, SetStateAction, useCallback, useContext, useState } from "react";
 import toast from "react-hot-toast";
+import { SWRConfig } from "swr";
 
 import { Paginated, Photo, ProfileWithMetadataAndSessionInfo } from "@/types";
 import { getProfileImages } from "@/actions/get-profile-images";
+import { api } from "@/config/axios";
 
 export interface ProfilePageProps {
   profile: ProfileWithMetadataAndSessionInfo;
   paginatedPhotos: Paginated<Photo>;
-  openedPhotoIndex: number;
-  setOpenedPhotoIndex: Dispatch<SetStateAction<number>>;
+  setProfile: Dispatch<SetStateAction<ProfileWithMetadataAndSessionInfo>>;
   retrieveMorePhotos: () => Promise<void>;
 }
 
 export const ProfilePageContext = createContext({} as ProfilePageProps);
+
+const fetcher = (url: string) => api.get(url).then((res) => res.data);
 
 interface ProfilePageProviderProps {
   children: React.ReactNode;
@@ -32,7 +28,7 @@ export function ProfilePageProvider({
   children,
   profile,
 }: ProfilePageProviderProps) {
-  const [openedPhotoIndex, setOpenedPhotoIndex] = useState<number>(-1);
+  const [profileState, setProfile] = useState<ProfileWithMetadataAndSessionInfo>(profile);
   const [paginatedPhotosOffset, setPaginatedPhotosOffset] = useState(0);
   const [paginatedPhotos, setPhotos] = useState<Paginated<Photo>>({
     data: [],
@@ -59,17 +55,18 @@ export function ProfilePageProvider({
   }, [paginatedPhotosOffset, setPhotos, setPaginatedPhotosOffset]);
 
   return (
-    <ProfilePageContext.Provider
-      value={{
-        profile,
-        paginatedPhotos,
-        openedPhotoIndex,
-        setOpenedPhotoIndex,
-        retrieveMorePhotos,
-      }}
-    >
-      {children}
-    </ProfilePageContext.Provider>
+    <SWRConfig value={{ suspense: true, fetcher }}>
+      <ProfilePageContext.Provider
+        value={{
+          profile: profileState,
+          paginatedPhotos,
+          retrieveMorePhotos,
+          setProfile,
+        }}
+      >
+        {children}
+      </ProfilePageContext.Provider>
+    </SWRConfig>
   );
 }
 

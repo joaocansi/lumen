@@ -12,3 +12,10 @@ export type ProfileWithFollowInfo = Profile & {
   followingCount: number;
   photosCount: number;
 }
+
+export type FollowSuggestion = {
+  username: string;
+  image?: string | null;
+  name: string;
+  mutualFriendUsernames: string[];
+}

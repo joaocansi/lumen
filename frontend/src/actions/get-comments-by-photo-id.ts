@@ -9,11 +9,9 @@ export async function getCommentsByPhotoId(
   try {
     const response = await api.get(`/photo/${photoId}/comments`);
     return { response: response.data as Comment[] };
-  } catch (error) {
+  } catch {
     return {
-      error: {
-        details: error,
-      },
+      error: "Não foi possível encontrar comentários.",
     };
   }
 }

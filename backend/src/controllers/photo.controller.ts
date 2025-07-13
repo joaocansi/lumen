@@ -24,6 +24,14 @@ const getPhotosByProfileSchema = z.object({
   }).nullable(),
 })
 
+const getPhotosSchema = z.object({
+  limit: z.string().transform(Number).refine(val => Number.isInteger(val) && val >= 0, { message: "Limit must be a non-negative integer" }),
+  offset: z.string().transform(Number).refine(val => Number.isInteger(val) && val >= 0, { message: "Offset must be a non-negative integer" }),
+  user: z.object({
+    id: z.string().min(1, "User ID is required")
+  }).nullable(),
+});
+
 const newCommentSchema = z.object({
   user: z.object({
     id: z.string().min(1, "User ID is required")
@@ -49,6 +57,23 @@ export class PhotoController extends Hono {
     this.get('/:photoId', isAuthenticated, this.getPhotoById.bind(this));
     this.post("/:photoId/like", mustBeAuthenticated, this.likePhoto.bind(this));
     this.delete("/:photoId/like", mustBeAuthenticated, this.unlikePhoto.bind(this));
+    this.get('/', isAuthenticated, this.getPhotos.bind(this));
+  }
+
+  async getPhotos(c: HonoContext) {
+    const queries = c.req.query();
+    const user = c.get('user');
+
+    let data: z.infer<typeof getPhotosSchema>;
+    try {
+      data = await getPhotosSchema.parseAsync({...queries, user})
+    } catch (error) {
+      console.log(error)
+      throw new ServiceError("Dados incorretos", ServiceErrorType.BadRequest);   
+    }
+
+    const photos = await this.photoService.getPhotos(data);
+    return c.json(photos);
   }
 
   async getPhotoById(c: HonoContext) {

@@ -18,6 +18,10 @@ import fs from "fs";
 import path from "path";
 import { AuthController } from "./controllers/auth.controller";
 import { prisma } from "./database/prisma/prisma-client";
+import { connectOttoman } from "./couchbase";
+import { LogModel } from "./couchbase/schemas/log";
+
+await connectOttoman();
 
 const app = new Hono<{
   Variables: {
@@ -43,10 +47,27 @@ app.on(["POST", "GET"], "/api/auth/*", (c) => {
   return auth.handler(c.req.raw);
 });
 
-app.onError((err, c) => {
-  if (err instanceof ServiceError) return err.toApiError(c);
-  console.log(err)
-  return ServiceError.internalServerError(c);
+app.onError(async (err, c) => {
+    const timestamp = new Date().toISOString();
+    const context = {
+        stack: err.stack,
+        url: c.req.url,
+        method: c.req.method,
+        userAgent: c.req.header("User-Agent"),
+        ip: c.req.header("X-Forwarded-For") || c.req.header("X-Real-IP"),
+    };
+
+    LogModel.create({
+        level: 'error',
+        message: err.message,
+        meta: {
+            ...context,
+            timestamp,
+        },
+    });
+
+    if (err instanceof ServiceError) return err.toApiError(c);
+    return ServiceError.internalServerError(c);
 });
 
 app.get(

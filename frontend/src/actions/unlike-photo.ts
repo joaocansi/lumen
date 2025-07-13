@@ -9,11 +9,9 @@ export async function unlikePhoto(
     return {
       response: {},
     };
-  } catch (error) {
+  } catch {
     return {
-      error: {
-        details: error,
-      },
+      error: "Não foi possível remover o like na imagem.",
     };
   }
 }

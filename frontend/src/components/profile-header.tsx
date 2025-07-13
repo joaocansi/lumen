@@ -4,13 +4,62 @@ import { Avatar } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 
 import { useProfilePage } from "@/hooks/useProfilePage";
+import { useState } from "react";
+import { EditProfileModal } from "./edit-profile-modal";
+import { api } from "@/config/axios";
+import toast from "react-hot-toast";
 
 const DEFAULT_AVATAR = "https://img.heroui.chat/image/avatar?w=150&h=150&u=1";
 
 export function ProfileHeader() {
-  const { profile } = useProfilePage();
+  const { profile, setProfile } = useProfilePage();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  async function handleProfileToggleFollow() {}
+  async function handleProfileToggleFollow() {
+    setIsLoading(true);
+    try {
+      if (profile._session.isFollowing) {
+        await api.delete(`/profile/follow/${profile.username}`);
+        setProfile((prev) => ({
+          ...prev,
+          followersCount: prev.followersCount - 1,
+          _session: { ...prev._session, isFollowing: false },
+        }));
+        toast.success("Você deixou de seguir!");
+      } else {
+        await api.post(`/profile/follow/${profile.username}`);
+        setProfile((prev) => ({
+          ...prev,
+          followersCount: prev.followersCount + 1,
+          _session: { ...prev._session, isFollowing: true },
+        }));
+        toast.success("Agora você está seguindo!");
+      }
+    } catch {
+      toast.error("Erro ao atualizar o status de seguir.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function handleEditProfileClick() {
+    setIsEditModalOpen(true);
+  }
+
+  function handleCloseEditModal() {
+    setIsEditModalOpen(false);
+  }
+
+  async function handleSaveProfile(data: { name: string; bio: string; image: string }) {
+    try {
+      await api.patch("/profile", data);
+      setIsEditModalOpen(false);
+      toast.success("Perfil atualizado com sucesso");
+    } catch (error) {
+      toast.error("Erro ao atualizar perfil");
+    }
+  }
 
   return (
     <section className="flex flex-col sm:flex-row items-center gap-8">
@@ -31,12 +80,13 @@ export function ProfileHeader() {
               color={profile._session.isFollowing ? "default" : "primary"}
               size="sm"
               onPress={handleProfileToggleFollow}
+              isLoading={isLoading}
             >
               {profile._session.isFollowing ? "Seguindo" : "Seguir"}
             </Button>
           )}
           {profile._session.isOwnProfile && (
-            <Button color="default" size="sm">
+            <Button color="default" size="sm" onPress={handleEditProfileClick}>
               Editar Perfil
             </Button>
           )}
@@ -58,6 +108,11 @@ export function ProfileHeader() {
 
         <p className="mt-1 text-sm max-w-md">{profile.bio}</p>
       </div>
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleSaveProfile}
+      />
     </section>
   );
 }

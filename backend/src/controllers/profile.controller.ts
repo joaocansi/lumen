@@ -38,6 +38,15 @@ export class ProfileController extends Hono {
 
     this.get("/username/:username/followers", this.getFollowers.bind(this));
     this.get("/username/:username/followings", this.getFollowing.bind(this));
+    this.get("/get-top-k-to-follow", mustBeAuthenticated, this.getTopKFollowSuggestion.bind(this))
+  }
+
+  async getTopKFollowSuggestion(c: HonoContext) {
+    const user = c.get("user");
+    if (!user) return ServiceError.internalServerError(c);
+    
+    const topKFollowSuggestion = await this.profileService.getTopKFollowSuggestion(user.id);
+    return c.json(topKFollowSuggestion);
   }
 
   async getProfileByUsername(c: HonoContext) {

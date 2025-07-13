@@ -7,11 +7,9 @@ export async function likePhoto(photoId: string): Promise<ActionResponse<{}>> {
     return {
       response: {},
     };
-  } catch (error) {
+  } catch {
     return {
-      error: {
-        details: error,
-      },
+      error: "Não foi possível dar like na imagem.",
     };
   }
 }

@@ -30,10 +30,27 @@ export interface Photo {
   width: number;
   height: number;
   caption: string;
-  updatedAt: Date;
+  uploadedAt: Date;
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
+}
+
+export interface PhotoWithProfile {
+  id: string;
+  path: string;
+  width: number;
+  height: number;
+  caption: string;
+  uploadedAt: Date;
+  likesCount: number;
+  commentsCount: number;
+  isLiked: boolean;
+  user: {
+    name: string;
+    username: string;
+    image?: string;
+  };
 }
 
 export type ProfileWithMetadata = Profile & {
@@ -60,9 +77,7 @@ export interface SessionProfile {
 
 export interface ActionResponse<T> {
   response?: T;
-  error?: {
-    details: any;
-  };
+  error?: string;
 }
 
 export interface Paginated<T> {

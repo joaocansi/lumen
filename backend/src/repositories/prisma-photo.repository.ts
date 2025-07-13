@@ -87,7 +87,7 @@ export class PrismaPhotoRepository implements PhotoRepository {
     return result && PrismaPhotoMapper.toPhoto(result);
   }
 
-  async get(limit: number, offset: number): Promise<Paginated<Photo[]>> {
+  async get(limit: number, offset: number, sessionUser?: string): Promise<Paginated<Photo[]>> {
     const [photos, total] = await Promise.all([
       prisma.photo.findMany({
         orderBy: { createdAt: "desc" },
@@ -99,6 +99,11 @@ export class PrismaPhotoRepository implements PhotoRepository {
             select: {
               comments: true,
               likes: true
+            }
+          },
+          likes: {
+            where: {
+              userId: sessionUser
             }
           }
         }

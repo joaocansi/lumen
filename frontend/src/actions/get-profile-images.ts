@@ -22,11 +22,9 @@ export async function getProfileImages(
       },
     );
     return { response: response.data };
-  } catch (error) {
+  } catch {
     return {
-      error: {
-        details: "Não foi possível realizar a solicitação",
-      },
+      error: "Não foi possível realizar a solicitação",
     };
   }
 }

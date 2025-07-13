@@ -61,12 +61,12 @@ export default function SignInPage() {
     );
 
     if (hasSignedIn) {
-      router.push("/");
+      window.location.href = "/";
     }
   };
 
   return (
-    <div className="w-[90%] max-w-lg mx-auto h-full min-h-screen flex flex-col items-center justify-center -mb-8">
+    <div className="w-[90%] max-w-lg mx-auto overflow-auto flex flex-col items-center justify-center -mb-8">
       <div className="w-full">
         <h1 className="text-4xl font-black">Login</h1>
         <p className="mt-1">

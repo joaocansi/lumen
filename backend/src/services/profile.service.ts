@@ -35,6 +35,11 @@ export class ProfileService {
     private profileRepository: ProfileRepository,
   ) {}
 
+  async getTopKFollowSuggestion(id: string) {
+    const topKFollowSuggestion = await this.profileRepository.getTopKFollowSuggestion(id, 5);
+    return topKFollowSuggestion;
+  }
+
   async getProfileByUsername(data: GetProfileByUsernameInput): Promise<GetProfileUsernameOutput> {
     const profile = await this.profileRepository.findByUsername(data.username);
     if (!profile) {

@@ -21,14 +21,18 @@ export class LocalFileUploaderProvider implements FileUploaderProvider {
   async upload(file: File): Promise<Image> {
       const buffer = Buffer.from(await file.arrayBuffer());
 
-      const image = sharp(buffer);
+      const resizedBuffer = await sharp(buffer)
+        .resize({ width: 1024, height: 800 })
+        .toBuffer();
+
+      const image = sharp(resizedBuffer);
       const metadata = await image.metadata();
 
       const fileExtension = path.extname(file.name) || '.jpg'; // fallback para jpg
       const fileName = `${randomUUID()}${fileExtension}`;
       const filePath = path.join(this.uploadDir, fileName);
 
-      await fs.promises.writeFile(filePath, buffer);
+      await fs.promises.writeFile(filePath, resizedBuffer);
       return {
         path: fileName,
         height: metadata.height,
