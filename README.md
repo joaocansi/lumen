@@ -1,9 +1,9 @@
 # 📸✨ lumen
-Lumen é uma rede social minimalista (quase) construída com Next.js e Node.js que permite aos usuários compartilhar fotos artísticas, curtir e explorar conteúdos visuais.
-O projeto foi desenvolvido como parte da disciplina de Projeto Integrador II.
+Lumen is a minimalist (almost) social network built with Next.js and Node.js that allows users to share artistic photos, like, and explore visual content.
+This project was developed for the Projeto Integrador II university course.
 
-⚠️ Muitas das features planejadas ainda não foram implementadas, mas estão previstas para versões futuras.
+⚠️ Many planned features were not completed in time but are expected to be implemented soon.
 
-### 🚀 Como rodar
-Atualmente, não há um tutorial oficial de instalação.
-Se quiser rodar localmente, recomendo explorar o código por conta própria.
+### 🚀 How to Run
+There’s no official setup guide yet.
+If you’d like to run it locally, feel free to explore the codebase.
